@@ -1,9 +1,29 @@
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("assets/fonts/onest-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Onest";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("assets/fonts/onest-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   --paper: #f8f7f5;
   --paper-light: #fbfbf9;
   --ink: #191919;
   --muted: #777572;
-  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Onest", Arial, sans-serif;
+  --display-tracking: -0.045em;
+  --heading-tracking: -0.03em;
   --label-size: 12px;
   --body-size: 16px;
   --card-title-size: clamp(28px, 2.5vw, 38px);
@@ -19,6 +39,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -28,7 +50,6 @@ body {
   background: var(--paper);
   font-family: var(--font-sans);
   font-weight: 400;
-  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -93,10 +114,8 @@ summary:focus-visible {
 
 .logo > span {
   font-size: 40px;
-  font-weight: 300;
-  letter-spacing: 0.13em;
-  transform: scaleX(1.24);
-  transform-origin: left;
+  font-weight: 400;
+  letter-spacing: 0.16em;
 }
 
 .logo small {
@@ -215,14 +234,13 @@ p {
 h1,
 h2 {
   font-weight: 300;
-  letter-spacing: -0.05em;
+  letter-spacing: var(--display-tracking);
+  text-wrap: balance;
 }
 
 h1 {
   font-size: 38px;
   line-height: 1.045;
-  transform: scaleX(1.1);
-  transform-origin: left;
 }
 
 .hero-copy > p {
@@ -296,7 +314,7 @@ h1 {
 .projects-title {
   font-size: clamp(70px, 10.4vw, 152px);
   font-weight: 300;
-  letter-spacing: -0.085em;
+  letter-spacing: var(--display-tracking);
   line-height: 0.82;
   transform: none;
   white-space: nowrap;
@@ -350,7 +368,7 @@ h1 {
   margin: 0;
   font-size: clamp(34px, 4.6vw, 66px);
   font-weight: 300;
-  letter-spacing: -0.055em;
+  letter-spacing: var(--display-tracking);
   line-height: 0.98;
 }
 
@@ -446,7 +464,7 @@ h1 {
 .projects-more > span:first-child {
   font-size: clamp(25px, 3.6vw, 46px);
   font-weight: 300;
-  letter-spacing: -0.055em;
+  letter-spacing: var(--heading-tracking);
   line-height: 1;
 }
 
@@ -471,7 +489,7 @@ h1 {
 .works-page-outro h2 {
   font-size: clamp(44px, 6vw, 86px);
   font-weight: 300;
-  letter-spacing: -0.07em;
+  letter-spacing: var(--display-tracking);
   line-height: 0.95;
 }
 
@@ -520,7 +538,7 @@ h1 {
   margin-top: 0;
   font-size: clamp(26px, 3vw, 42px);
   font-weight: 300;
-  letter-spacing: -0.055em;
+  letter-spacing: var(--heading-tracking);
   line-height: 1;
 }
 
@@ -650,7 +668,7 @@ body.menu-open {
   font-family: var(--font-sans);
   font-size: var(--section-title-size);
   font-weight: 400;
-  letter-spacing: -0.065em;
+  letter-spacing: var(--heading-tracking);
   line-height: 1.02;
   text-wrap: balance;
 }
@@ -667,7 +685,7 @@ body.menu-open {
   max-width: 800px;
   font-size: clamp(64px, 7.8vw, 112px);
   font-weight: 300;
-  letter-spacing: -0.085em;
+  letter-spacing: var(--display-tracking);
   line-height: 0.9;
 }
 
@@ -736,7 +754,7 @@ body.menu-open {
 .service-tab-text strong {
   font-size: clamp(23px, 2.65vw, 38px);
   font-weight: 300;
-  letter-spacing: -0.06em;
+  letter-spacing: var(--heading-tracking);
   line-height: 1.02;
   text-wrap: balance;
 }
@@ -877,7 +895,7 @@ body.menu-open {
   margin: 0;
   font-size: clamp(29px, 3vw, 43px);
   font-weight: 300;
-  letter-spacing: -0.065em;
+  letter-spacing: var(--heading-tracking);
   line-height: 1.04;
   text-wrap: balance;
 }
@@ -914,7 +932,7 @@ body.menu-open {
   margin: 11px 0 0;
   font-size: var(--card-title-size);
   font-weight: 400;
-  letter-spacing: -0.06em;
+  letter-spacing: var(--heading-tracking);
   line-height: 0.98;
   text-wrap: balance;
 }
@@ -932,6 +950,10 @@ body.menu-open {
 
 .workflow-intro {
   display: block;
+}
+
+.workflow-intro h2 {
+  font-weight: 300;
 }
 
 .workflow-content {
@@ -1025,7 +1047,7 @@ body.menu-open {
   color: #f4f2ed;
   font-size: clamp(60px, 6vw, 92px);
   font-weight: 300;
-  letter-spacing: -0.08em;
+  letter-spacing: var(--display-tracking);
   line-height: 0.95;
 }
 
@@ -1087,7 +1109,7 @@ body.menu-open {
   max-width: 930px;
   font-size: clamp(54px, 6.5vw, 96px);
   font-weight: 300;
-  letter-spacing: -0.075em;
+  letter-spacing: var(--display-tracking);
   line-height: 0.92;
   text-wrap: balance;
 }
@@ -1129,7 +1151,7 @@ body.menu-open {
   cursor: pointer;
   font-size: clamp(19px, 1.8vw, 25px);
   font-weight: 400;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
   line-height: 1.16;
   text-align: left;
   text-wrap: balance;
@@ -1235,7 +1257,7 @@ body.menu-open {
 .contact-intro h2 {
   font-size: clamp(56px, 5.3vw, 82px);
   font-weight: 300;
-  letter-spacing: -0.075em;
+  letter-spacing: var(--display-tracking);
   line-height: 0.95;
 }
 
@@ -1298,7 +1320,7 @@ body.menu-open {
   background: transparent;
   font-size: 16px;
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1.35;
   transition: border-color 220ms ease, box-shadow 220ms ease;
 }
@@ -1678,7 +1700,7 @@ body.menu-open {
     min-width: 0;
     font-size: clamp(27px, 7.5vw, 42px);
     font-weight: 300;
-    letter-spacing: -0.055em;
+    letter-spacing: var(--heading-tracking);
     line-height: 1.05;
     hyphens: auto;
   }
