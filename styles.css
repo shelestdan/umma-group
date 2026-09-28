@@ -105,26 +105,16 @@ summary:focus-visible {
 
 .logo {
   display: inline-flex;
-  width: 125px;
-  flex-direction: column;
-  align-items: flex-start;
+  width: 170px;
+  align-items: center;
   color: var(--ink);
   line-height: 1;
 }
 
 .logo > span {
-  font-size: 40px;
-  font-weight: 400;
-  letter-spacing: 0.16em;
-}
-
-.logo small {
-  align-self: center;
-  margin-top: 3px;
-  padding-left: 0.4em;
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.52em;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
 }
 
 .desktop-nav {
@@ -1600,7 +1590,7 @@ body.menu-open {
   }
 
   .logo > span {
-    font-size: 33px;
+    font-size: 28px;
   }
 
   .desktop-nav,
