@@ -189,13 +189,13 @@ p { text-wrap: pretty; }
 .strike { position: relative; display: inline-block; }
 .strike::after {
   content: ""; position: absolute; left: -0.05em; right: -0.05em; top: 50%; height: 0.1em;
-  background: var(--coral); transform: scaleX(0); transform-origin: left; transition: transform 0.7s var(--ease) 0.55s;
+  background: var(--coral); transform: scaleX(0); transform-origin: left; transition: transform 0.7s var(--ease) 0.95s;
 }
 .is-in .strike::after { transform: scaleX(1); }
 .hl {
   padding: 0 0.12em; margin: 0 -0.12em;
   background: linear-gradient(var(--coral), var(--coral)) left center / 0% 100% no-repeat;
-  transition: background-size 0.9s var(--ease) 0.6s;
+  transition: background-size 0.9s var(--ease) 1s;
 }
 .is-in .hl { background-size: 100% 100%; }
 
@@ -339,13 +339,26 @@ details p { overflow: hidden; padding: 0 0 26px; color: var(--muted); max-width:
 .intro.is-leaving { opacity: 0; transform: scale(1.03); pointer-events: none; }
 @keyframes letter-in { to { opacity: 1; filter: none; } }
 
-/* Движение: «печать» текста и появление блоков */
-/* Запас сверху — для краткой над Й и точек над Ё: при плотном интервале они выше строки */
-.w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.26em 0 0.14em; margin: -0.26em 0 -0.14em; }
-.w > span { display: inline-block; transform: translateY(150%); transition: transform 0.95s var(--ease); transition-delay: calc(var(--i) * 60ms); }
-.is-in .w > span { transform: none; }
-.c { opacity: 0; transition: opacity 0.12s linear; transition-delay: calc(var(--i) * 26ms); }
-.is-in .c { opacity: 1; }
+/* Движение B: по словам заголовка проходит цветная плашка («рама»), слоганы проявляются из размытия.
+   Слова ничем не обрезаются, поэтому кратка Й и точки Ё всегда видны целиком. */
+.w { position: relative; display: inline-block; vertical-align: top; }
+.w > span { display: inline-block; opacity: 0; }
+.w::after {
+  content: ""; position: absolute; left: -0.04em; right: -0.04em; top: 0.04em; bottom: 0.02em;
+  background: var(--coral); transform: scaleX(0); transform-origin: left; pointer-events: none;
+}
+.cta-band .w::after { background: var(--navy); }
+.is-in .w::after { animation: bar-wipe 0.85s var(--ease) both; animation-delay: calc(var(--i) * 90ms); }
+.is-in .w > span { animation: word-on 0.01s linear both; animation-delay: calc(var(--i) * 90ms + 0.42s); }
+@keyframes bar-wipe {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(1); transform-origin: left; }
+  50.01% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+@keyframes word-on { to { opacity: 1; } }
+.c { opacity: 0; filter: blur(8px); transition: opacity 0.7s var(--ease), filter 0.7s var(--ease); transition-delay: calc(var(--i) * 16ms); }
+.is-in .c { opacity: 1; filter: none; }
 .js [data-reveal] { opacity: 0; transform: translateY(32px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
 .js .card[data-reveal] { transform: translateY(48px); }
 .js .card[data-reveal]:nth-child(2) { transition-delay: 0.1s; }
