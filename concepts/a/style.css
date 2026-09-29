@@ -321,8 +321,9 @@ details p { overflow: hidden; padding: 0 64px 28px 0; color: var(--muted); max-w
 @keyframes letter-in { to { opacity: 1; transform: none; } }
 
 /* Движение: «печать» текста, появление блоков, раскрытие фото */
-.w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.12em; margin-bottom: -0.12em; }
-.w > span { display: inline-block; transform: translateY(108%); transition: transform 0.95s var(--ease); transition-delay: calc(var(--i) * 55ms); }
+/* Запас сверху — для краткой над Й и точек над Ё: при плотном интервале они выше строки */
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.26em 0 0.14em; margin: -0.26em 0 -0.14em; }
+.w > span { display: inline-block; transform: translateY(150%); transition: transform 0.95s var(--ease); transition-delay: calc(var(--i) * 55ms); }
 .is-in .w > span { transform: none; }
 .c { opacity: 0; transition: opacity 0.12s linear; transition-delay: calc(var(--i) * 26ms); }
 .is-in .c { opacity: 1; }
