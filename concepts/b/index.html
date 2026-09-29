@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#13233a" />
+    <link rel="icon" href="data:," />
+    <title>FRAMEX · Концепт B «Рама»</title>
+    <script>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add("js");
+        try {
+          var force = new URLSearchParams(location.search).has("intro");
+          var seen = sessionStorage.getItem("framex-intro-seen");
+          if (!matchMedia("(prefers-reduced-motion: reduce)").matches && (force || !seen)) d.classList.add("intro-on");
+        } catch (e) {}
+        // Если скрипт страницы не загрузился, через 7 с показываем сайт без заставки и анимаций.
+        setTimeout(function () {
+          if (!d.classList.contains("page-ready")) d.classList.remove("intro-on", "js");
+        }, 7000);
+      })();
+    </script>
+    <link rel="preload" href="../../assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="intro" data-intro>
+      <p class="intro-word">
+        <span class="vh">FRAMEX</span>
+        <span class="intro-letters" aria-hidden="true">
+          <span style="--i: 0">F</span><span style="--i: 1">R</span><span style="--i: 2">A</span><span style="--i: 3">M</span><span style="--i: 4">E</span>
+          <svg class="mark" data-mark viewBox="0 0 100 100" style="--i: 5"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg>
+        </span>
+      </p>
+      <button class="intro-skip" type="button" data-intro-skip>Пропустить заставку</button>
+    </div>
+
+    <a class="skip-link" href="#main">К содержанию</a>
+
+    <header class="header">
+      <a class="brand" href="#top" aria-label="FRAMEX, в начало страницы">
+        <span class="logo" aria-hidden="true">FRAME<svg class="mark" viewBox="0 0 100 100"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg></span>
+        <span class="brand-sign" aria-hidden="true" data-type="фреймекс" data-type-after-intro>фреймекс</span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="#about">О нас</a>
+        <a href="#works">Портфолио</a>
+        <a href="#faq">Вопросы</a>
+        <a href="#contact">Контакты</a>
+      </nav>
+      <a class="pill pill--coral header-cta" href="#contact">Обсудить<span class="cta-long">&nbsp;проект</span></a>
+      <button class="menu-button" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu" aria-label="Открыть меню">
+        <span aria-hidden="true"></span>
+      </button>
+      <nav class="menu" id="menu" aria-label="Мобильная навигация" hidden>
+        <a href="#about">О нас</a>
+        <a href="#works">Портфолио</a>
+        <a href="#faq">Вопросы</a>
+        <a href="#contact">Контакты</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <h1 id="hero-title">Застройка выставочных стендов</h1>
+          <p>Проектируем и&nbsp;изготавливаем стенды для выставок и&nbsp;других мероприятий. Берём на&nbsp;себя все этапы&nbsp;— от&nbsp;проекта до&nbsp;монтажа и&nbsp;сдачи стенда.</p>
+          <div class="hero-actions">
+            <a class="pill pill--coral pill--large" href="#contact">Обсудить проект <span class="pill-arrow" aria-hidden="true">↘</span></a>
+            <a class="hero-link" href="#works">Смотреть работы</a>
+          </div>
+        </div>
+        <figure class="hero-frame">
+          <div class="frame"><img src="../../assets/works/ulyanovsk-russia-02.webp" width="1280" height="853" alt="Макет самолёта на стенде Ульяновской области" fetchpriority="high" /></div>
+          <figcaption><strong>Ульяновская область</strong> Выставка «Россия», 2024</figcaption>
+        </figure>
+      </section>
+
+      <section class="about" id="about" aria-labelledby="about-title">
+        <div class="wrap">
+          <h2 id="about-title" class="slogan" data-reveal>Превращаем квадратные метры во&nbsp;впечатления</h2>
+          <div class="about-grid">
+            <div class="about-item" data-reveal>
+              <h3>Дизайн, который работает на&nbsp;бренд</h3>
+              <p>Разрабатываем концепцию стенда с&nbsp;учётом задач компании, фирменного стиля и&nbsp;особенностей выставочной площадки.</p>
+            </div>
+            <div class="about-item" data-reveal>
+              <h3>От&nbsp;идеи до&nbsp;готового стенда</h3>
+              <p>Проектирование, документация, монтаж и&nbsp;сдача стенда на&nbsp;выставке&nbsp;— в&nbsp;одних руках.</p>
+            </div>
+            <div class="about-item" data-reveal>
+              <h3>Надёжная реализация</h3>
+              <p>Подбираем материалы и&nbsp;технологии, контролируем качество исполнения и&nbsp;соблюдение требований площадки.</p>
+            </div>
+            <div class="about-item" data-reveal>
+              <h3>Команда на&nbsp;связи</h3>
+              <p>Дизайнеры, проектировщики и&nbsp;монтажники работают над проектом вместе, без лишних посредников.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="works" id="works" aria-labelledby="works-title" data-strip>
+        <div class="wrap works-head" data-reveal>
+          <div>
+            <h2 id="works-title">Портфолио</h2>
+            <p>Каждый проект подписан одинаково: название, событие, год. Визуализации отмечены отдельно и&nbsp;не&nbsp;выдаются за&nbsp;выполненные работы.</p>
+          </div>
+          <div class="strip-controls">
+            <button class="round" type="button" data-strip-prev aria-label="Предыдущие работы">←</button>
+            <button class="round" type="button" data-strip-next aria-label="Следующие работы">→</button>
+          </div>
+        </div>
+        <ul class="strip" data-strip-track tabindex="0" aria-label="Работы, прокручиваются горизонтально">
+          <li class="card">
+            <div class="card-frame"><img src="../../assets/works/polyplastic-ruplastic-02.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Стенд Полипластик с экраном и образцами продукции" /></div>
+            <p class="plaque"><strong>Полипластик</strong><span>RUPLASTIC · 2024</span></p>
+          </li>
+          <li class="card">
+            <div class="card-frame"><img src="../../assets/works/vologda-golden-autumn-03.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Экспозиция Вологодской области с витринами продукции" /></div>
+            <p class="plaque"><strong>Вологодская область</strong><span>Золотая осень · 2024</span></p>
+          </li>
+          <li class="card">
+            <div class="card-frame"><img src="../../assets/works/fashion-forum-02.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Экспозиция Форума моды в Таврическом дворце" /></div>
+            <p class="plaque"><strong>Форум моды</strong><span>Таврический дворец · 2025</span></p>
+          </li>
+          <li class="card">
+            <div class="card-frame"><img src="../../assets/works/vk-kvartirnik-03.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Фотозона ВК Квартирника с подсветкой" /></div>
+            <p class="plaque"><strong>ВК Квартирник</strong><span>Событийное пространство · 2025</span></p>
+          </li>
+          <li class="card card--concept">
+            <div class="card-frame"><img src="../../assets/service-retail-concept.webp" width="1672" height="941" loading="lazy" decoding="async" alt="Концептуальная визуализация торгового пространства" /></div>
+            <p class="plaque"><em class="tag">Концепт · ИИ-визуализация</em><strong>Пример подписи концепта</strong><span>Не реализованный проект</span></p>
+          </li>
+          <li class="card">
+            <div class="card-frame"><img src="../../assets/works/maer-vef-02.webp" width="1280" height="853" loading="lazy" decoding="async" alt="Зона выступлений на стенде MAER" /></div>
+            <p class="plaque"><strong>MAER</strong><span>ВЭФ · 2024</span></p>
+          </li>
+        </ul>
+        <div class="wrap"><a class="hero-link works-all" href="../../works.html">Все проекты</a></div>
+      </section>
+
+      <section class="cta-band" aria-labelledby="cta-title">
+        <div class="wrap cta-inner" data-reveal>
+          <h2 id="cta-title">Выставка уже в&nbsp;календаре?</h2>
+          <p>Пришлите даты, площадку и&nbsp;примерную площадь&nbsp;— предложим, с&nbsp;чего начать.</p>
+          <a class="pill pill--navy pill--large" href="#contact">Обсудить проект <span class="pill-arrow" aria-hidden="true">↘</span></a>
+        </div>
+      </section>
+
+      <section class="faq" id="faq" aria-labelledby="faq-title">
+        <div class="wrap">
+          <h2 id="faq-title" data-reveal>Вопросы и&nbsp;ответы</h2>
+          <div class="faq-grid" data-reveal>
+            <details>
+              <summary>От чего зависит стоимость стенда?</summary>
+              <p>От площади, сложности конструкции, материалов и&nbsp;технического наполнения. Точную смету подготовим после обсуждения задачи.</p>
+            </details>
+            <details>
+              <summary>Что нужно для первого расчёта?</summary>
+              <p>Даты, площадка, примерная площадь и&nbsp;задачи бренда. План, бриф и&nbsp;референсы помогут точнее понять проект.</p>
+            </details>
+            <details>
+              <summary>Можно ли начать без готового ТЗ?</summary>
+              <p>Да. Расскажите о&nbsp;мероприятии и&nbsp;цели стенда&nbsp;— вместе определим, какие исходные данные нужны дальше.</p>
+            </details>
+            <details>
+              <summary>Из чего вы строите стенды?</summary>
+              <p>Сейчас&nbsp;— из&nbsp;коробов. Материалы отделки и&nbsp;оснащение подбираем под задачу и&nbsp;требования площадки.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact" id="contact" aria-labelledby="contact-title">
+        <div class="wrap contact-inner">
+          <div class="contact-head" data-reveal>
+            <h2 id="contact-title">Расскажите о&nbsp;задаче</h2>
+            <p>Опишите формат, площадку и&nbsp;сроки&nbsp;— мы свяжемся и&nbsp;уточним детали.</p>
+          </div>
+          <form class="form" data-demo-form data-reveal>
+            <label class="field"><span>Имя *</span><input name="name" autocomplete="name" required /></label>
+            <label class="field"><span>Телефон *</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" required /></label>
+            <label class="field field--wide"><span>Компания или email</span><input name="company" autocomplete="organization" /></label>
+            <label class="field field--wide"><span>О проекте</span><textarea name="task" rows="3" placeholder="Выставка, даты, примерная площадь"></textarea></label>
+            <label class="consent field--wide"><input type="checkbox" name="consent" required /><span>Согласен(-на) на обработку данных для ответа по заявке</span></label>
+            <div class="form-actions field--wide">
+              <button class="pill pill--coral pill--large" type="submit">Обсудить проект <span class="pill-arrow" aria-hidden="true">↘</span></button>
+              <p class="form-note">Демо-форма концепта: данные не отправляются.</p>
+            </div>
+            <p class="form-status field--wide" data-form-status role="status"></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <span class="logo" aria-hidden="true">FRAME<svg class="mark" viewBox="0 0 100 100"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg></span>
+        <p>Телефон, почта и&nbsp;Telegram появятся после согласования.</p>
+        <p><a class="hero-link" href="../">← К выбору концептов</a></p>
+      </div>
+    </footer>
+
+    <script src="../shared.js" defer></script>
+  </body>
+</html>
