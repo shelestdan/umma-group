@@ -70,6 +70,17 @@ function finishIntro() {
   try {
     sessionStorage.setItem("framex-intro-seen", "1");
   } catch {}
+  // Вариант B: синее окно раскрывается из места, где стоит X, на весь экран
+  const cover = intro.querySelector("[data-intro-cover]");
+  const mark = intro.querySelector("[data-mark]");
+  if (cover && mark && !reduceMotion) {
+    const r = mark.getBoundingClientRect();
+    cover.style.transition = "none";
+    cover.style.clipPath = `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`;
+    cover.getBoundingClientRect();
+    cover.style.transition = "";
+    cover.style.clipPath = "inset(0)";
+  }
   intro.classList.add("is-leaving");
   pageParts.forEach((el) => (el.inert = false));
   const done = () => {
@@ -77,7 +88,7 @@ function finishIntro() {
     intro.remove();
     afterIntro();
   };
-  reduceMotion ? done() : setTimeout(done, 600);
+  reduceMotion ? done() : setTimeout(done, +intro.dataset.introExit || 600);
 }
 
 async function playIntro() {
@@ -93,7 +104,7 @@ async function playIntro() {
 
   const path = intro.querySelector("[data-mark] path");
   intro.classList.add("is-playing");
-  await wait(700); // буквы F-R-A-M-E появляются по очереди (CSS)
+  await wait(+intro.dataset.introDelay || 700); // буквы F-R-A-M-E появляются по очереди (CSS)
   await tween(path, 0, 1, 520); // X → рама
   await wait(320);
   await tween(path, 1, 0, 440); // рама → X

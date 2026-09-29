@@ -327,17 +327,27 @@ details p { overflow: hidden; padding: 0 0 26px; color: var(--muted); max-width:
 }
 .intro-word { font-weight: 800; font-size: clamp(56px, 13vw, 176px); line-height: 1; letter-spacing: 0.01em; color: var(--navy); }
 .intro-letters { display: inline-flex; align-items: baseline; }
-.intro-letters > * { opacity: 0; filter: blur(8px); }
-.intro.is-playing .intro-letters > * { animation: letter-in 0.55s ease forwards; animation-delay: calc(var(--i) * 110ms); }
-.intro .mark { color: var(--coral); margin-left: 0.03em; }
+/* Заставка B: буквы открывает коралловая плашка, X влетает с поворотом,
+   превращается в раму и обратно, затем из X раскрывается синее окно на весь экран */
+.intro-letters > span { position: relative; opacity: 0; }
+.intro-letters > span::after {
+  content: ""; position: absolute; left: -0.02em; right: -0.02em; top: 0.12em; bottom: 0.04em;
+  background: var(--coral); transform: scaleX(0); transform-origin: left;
+}
+.intro.is-playing .intro-letters > span { animation: word-on 0.01s linear both; animation-delay: calc(var(--i) * 120ms + 0.26s); }
+.intro.is-playing .intro-letters > span::after { animation: bar-wipe 0.55s var(--ease) both; animation-delay: calc(var(--i) * 120ms); }
+.intro .mark { color: var(--coral); margin-left: 0.03em; opacity: 0; transform: scale(0.2) rotate(-135deg); }
+.intro.is-playing .mark { animation: mark-in 0.7s var(--ease) 0.62s forwards; }
+@keyframes mark-in { to { opacity: 1; transform: none; } }
 .intro-skip {
   position: absolute; right: var(--gutter); bottom: max(28px, env(safe-area-inset-bottom));
   padding: 14px 20px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--navy);
   font-family: inherit; font-weight: 500; font-size: 15px; line-height: 1; cursor: pointer;
 }
 .intro-skip:hover { background: var(--bone); }
-.intro.is-leaving { opacity: 0; transform: scale(1.03); pointer-events: none; }
-@keyframes letter-in { to { opacity: 1; filter: none; } }
+.intro-cover { position: absolute; inset: 0; background: var(--navy); clip-path: inset(50%); transition: clip-path 0.75s var(--ease); pointer-events: none; }
+.intro.is-leaving { pointer-events: none; }
+.intro.is-leaving .intro-skip { opacity: 0; }
 
 /* Движение B: по словам заголовка проходит цветная плашка («рама»), слоганы проявляются из размытия.
    Слова ничем не обрезаются, поэтому кратка Й и точки Ё всегда видны целиком. */
