@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#13233a" />
+    <link rel="icon" href="data:," />
+    <title>FRAMEX · Все работы · Концепт B</title>
+    <script>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add("js");
+        // Если скрипт страницы не загрузился, через 7 с показываем страницу без анимаций.
+        setTimeout(function () {
+          if (!d.classList.contains("page-ready")) d.classList.remove("js");
+        }, 7000);
+      })();
+    </script>
+    <link rel="preload" href="../../assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="works-page">
+    <a class="skip-link" href="#main">К содержанию</a>
+
+    <header class="header">
+      <a class="brand" href="index.html" aria-label="FRAMEX, на главную">
+        <span class="logo" aria-hidden="true">FRAME<svg class="mark" viewBox="0 0 100 100"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg></span>
+        <span class="brand-sign" aria-hidden="true">фреймекс</span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="index.html#about">О нас</a>
+        <a href="works.html" aria-current="page">Портфолио</a>
+        <a href="index.html#faq">Вопросы</a>
+        <a href="index.html#contact">Контакты</a>
+      </nav>
+      <a class="pill pill--coral header-cta" href="index.html#contact">Обсудить<span class="cta-long">&nbsp;проект</span></a>
+      <button class="menu-button" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu" aria-label="Открыть меню">
+        <span aria-hidden="true"></span>
+      </button>
+      <nav class="menu" id="menu" aria-label="Мобильная навигация" hidden>
+        <a href="index.html#about">О нас</a>
+        <a href="works.html" aria-current="page">Портфолио</a>
+        <a href="index.html#faq">Вопросы</a>
+        <a href="index.html#contact">Контакты</a>
+        <a class="pill pill--coral pill--large menu-cta" href="index.html#contact">Обсудить проект <span class="pill-arrow" aria-hidden="true">↘</span></a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="works-hero" aria-labelledby="works-hero-title">
+        <div class="wrap">
+          <h1 id="works-hero-title" data-split>Портфолио</h1>
+          <p class="works-hero-lead" data-print>Шесть проектов&nbsp;— каждый подписан одинаково: название, событие, год.</p>
+          <ul class="chips" data-reveal aria-label="Проекты на странице">
+            <li><a href="#vologda">Вологодская область</a></li>
+            <li><a href="#polyplastic">Полипластик</a></li>
+            <li><a href="#ulyanovsk">Ульяновская область</a></li>
+            <li><a href="#maer">MAER</a></li>
+            <li><a href="#fashion">Форум моды</a></li>
+            <li><a href="#vk">ВК Квартирник</a></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="project project--bone" id="vologda" aria-labelledby="vologda-title">
+        <div class="wrap">
+          <div class="project-head">
+            <h2 id="vologda-title" data-split>Вологодская область</h2>
+            <p class="plaque" data-reveal><strong>«Золотая осень»</strong><span>2024 · 3 фото</span></p>
+          </div>
+          <div class="gallery gallery--3">
+            <a class="shot" href="../../assets/works/vologda-golden-autumn-03.webp" data-photo data-project="Вологодская область" aria-label="Открыть фото 1 из 3: Экспозиция Вологодской области с витринами продукции"><span class="shot-frame" data-reveal><img src="../../assets/works/vologda-golden-autumn-03.webp" width="1280" height="960" decoding="async" alt="Экспозиция Вологодской области с витринами продукции" /></span></a>
+            <a class="shot" href="../../assets/works/vologda-golden-autumn-02.webp" data-photo data-project="Вологодская область" aria-label="Открыть фото 2 из 3: Стенд Вологодской области с кольцевым подвесом"><span class="shot-frame" data-reveal><img src="../../assets/works/vologda-golden-autumn-02.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Стенд Вологодской области с кольцевым подвесом" /></span></a>
+            <a class="shot" href="../../assets/works/vologda-golden-autumn-01.webp" data-photo data-project="Вологодская область" aria-label="Открыть фото 3 из 3: Посетители стенда Вологодской области на «Золотой осени»"><span class="shot-frame" data-reveal><img src="../../assets/works/vologda-golden-autumn-01.webp" width="1280" height="853" loading="lazy" decoding="async" alt="Посетители стенда Вологодской области на «Золотой осени»" /></span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="project project--navy" id="polyplastic" aria-labelledby="polyplastic-title" data-expand>
+        <div class="wrap">
+          <div class="project-head">
+            <h2 id="polyplastic-title" data-split>Полипластик</h2>
+            <p class="plaque" data-reveal><strong>RUPLASTIC</strong><span>2024 · 3 фото</span></p>
+          </div>
+          <div class="gallery gallery--3">
+            <a class="shot" href="../../assets/works/polyplastic-ruplastic-01.webp" data-photo data-project="Полипластик" aria-label="Открыть фото 1 из 3: Общий вид выставочного стенда Полипластик"><span class="shot-frame" data-reveal><img src="../../assets/works/polyplastic-ruplastic-01.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Общий вид выставочного стенда Полипластик" /></span></a>
+            <a class="shot" href="../../assets/works/polyplastic-ruplastic-02.webp" data-photo data-project="Полипластик" aria-label="Открыть фото 2 из 3: Стенд Полипластик с экраном и образцами продукции"><span class="shot-frame" data-reveal><img src="../../assets/works/polyplastic-ruplastic-02.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Стенд Полипластик с экраном и образцами продукции" /></span></a>
+            <a class="shot" href="../../assets/works/polyplastic-ruplastic-03.webp" data-photo data-project="Полипластик" aria-label="Открыть фото 3 из 3: Угловой вид стенда Полипластик на RUPLASTIC"><span class="shot-frame" data-reveal><img src="../../assets/works/polyplastic-ruplastic-03.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Угловой вид стенда Полипластик на RUPLASTIC" /></span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="project project--bone" id="ulyanovsk" aria-labelledby="ulyanovsk-title">
+        <div class="wrap">
+          <div class="project-head">
+            <h2 id="ulyanovsk-title" data-split>Ульяновская область</h2>
+            <p class="plaque" data-reveal><strong>Выставка «Россия»</strong><span>2024 · 3 фото</span></p>
+          </div>
+          <div class="gallery gallery--3">
+            <a class="shot" href="../../assets/works/ulyanovsk-russia-01.webp" data-photo data-project="Ульяновская область" aria-label="Открыть фото 1 из 3: Стенд Ульяновской области с макетом самолёта"><span class="shot-frame" data-reveal><img src="../../assets/works/ulyanovsk-russia-01.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Стенд Ульяновской области с макетом самолёта" /></span></a>
+            <a class="shot" href="../../assets/works/ulyanovsk-russia-02.webp" data-photo data-project="Ульяновская область" aria-label="Открыть фото 2 из 3: Крупный план макета самолёта на стенде Ульяновской области"><span class="shot-frame" data-reveal><img src="../../assets/works/ulyanovsk-russia-02.webp" width="1280" height="853" loading="lazy" decoding="async" alt="Крупный план макета самолёта на стенде Ульяновской области" /></span></a>
+            <a class="shot" href="../../assets/works/ulyanovsk-russia-03.webp" data-photo data-project="Ульяновская область" aria-label="Открыть фото 3 из 3: Интерактивная кабина самолёта на стенде Ульяновской области"><span class="shot-frame" data-reveal><img src="../../assets/works/ulyanovsk-russia-03.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Интерактивная кабина самолёта на стенде Ульяновской области" /></span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="project project--navy" id="maer" aria-labelledby="maer-title" data-expand>
+        <div class="wrap">
+          <div class="project-head">
+            <h2 id="maer-title" data-split>MAER</h2>
+            <p class="plaque" data-reveal><strong>ВЭФ</strong><span>2024 · 4 фото</span></p>
+          </div>
+          <div class="gallery gallery--4">
+            <a class="shot" href="../../assets/works/maer-vef-01.webp" data-photo data-project="MAER" aria-label="Открыть фото 1 из 4: Мультимедийный стенд MAER на ВЭФ 2024"><span class="shot-frame" data-reveal><img src="../../assets/works/maer-vef-01.webp" width="1180" height="730" loading="lazy" decoding="async" alt="Мультимедийный стенд MAER на ВЭФ 2024" /></span></a>
+            <a class="shot" href="../../assets/works/maer-vef-02.webp" data-photo data-project="MAER" aria-label="Открыть фото 2 из 4: Зона выступлений на стенде MAER"><span class="shot-frame" data-reveal><img src="../../assets/works/maer-vef-02.webp" width="1280" height="853" loading="lazy" decoding="async" alt="Зона выступлений на стенде MAER" /></span></a>
+            <a class="shot" href="../../assets/works/maer-vef-04.webp" data-photo data-project="MAER" aria-label="Открыть фото 3 из 4: Общий вид стенда MAER с LED-экранами"><span class="shot-frame" data-reveal><img src="../../assets/works/maer-vef-04.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Общий вид стенда MAER с LED-экранами" /></span></a>
+            <a class="shot" href="../../assets/works/maer-vef-03.webp" data-photo data-project="MAER" aria-label="Открыть фото 4 из 4: Стенд MAER с трансляцией форума"><span class="shot-frame" data-reveal><img src="../../assets/works/maer-vef-03.webp" width="1000" height="667" loading="lazy" decoding="async" alt="Стенд MAER с трансляцией форума" /></span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="project project--bone" id="fashion" aria-labelledby="fashion-title">
+        <div class="wrap">
+          <div class="project-head">
+            <h2 id="fashion-title" data-split>Форум моды</h2>
+            <p class="plaque" data-reveal><strong>Таврический дворец</strong><span>2025 · 4 фото</span></p>
+          </div>
+          <div class="gallery gallery--4">
+            <a class="shot" href="../../assets/works/fashion-forum-01.webp" data-photo data-project="Форум моды" aria-label="Открыть фото 1 из 4: Экспозиция Форума моды в Таврическом дворце"><span class="shot-frame" data-reveal><img src="../../assets/works/fashion-forum-01.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Экспозиция Форума моды в Таврическом дворце" /></span></a>
+            <a class="shot" href="../../assets/works/fashion-forum-04.webp" data-photo data-project="Форум моды" aria-label="Открыть фото 2 из 4: Экспозиция Форума моды с декоративным объектом"><span class="shot-frame" data-reveal><img src="../../assets/works/fashion-forum-04.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Экспозиция Форума моды с декоративным объектом" /></span></a>
+            <a class="shot" href="../../assets/works/fashion-forum-02.webp" data-photo data-project="Форум моды" aria-label="Открыть фото 3 из 4: Одежда и изделия в подсвеченной экспозиции"><span class="shot-frame" data-reveal><img src="../../assets/works/fashion-forum-02.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Одежда и изделия в подсвеченной экспозиции" /></span></a>
+            <a class="shot" href="../../assets/works/fashion-forum-03.webp" data-photo data-project="Форум моды" aria-label="Открыть фото 4 из 4: Аксессуары и предметы в выставочной зоне"><span class="shot-frame" data-reveal><img src="../../assets/works/fashion-forum-03.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Аксессуары и предметы в выставочной зоне" /></span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="project project--navy" id="vk" aria-labelledby="vk-title" data-expand>
+        <div class="wrap">
+          <div class="project-head">
+            <h2 id="vk-title" data-split>ВК Квартирник</h2>
+            <p class="plaque" data-reveal><strong>Событийное пространство</strong><span>2025 · 5 фото</span></p>
+          </div>
+          <div class="gallery gallery--5">
+            <a class="shot" href="../../assets/works/vk-kvartirnik-04.webp" data-photo data-project="ВК Квартирник" aria-label="Открыть фото 1 из 5: Входная зона ВК Квартирника"><span class="shot-frame" data-reveal><img src="../../assets/works/vk-kvartirnik-04.webp" width="1280" height="960" loading="lazy" decoding="async" alt="Входная зона ВК Квартирника" /></span></a>
+            <a class="shot" href="../../assets/works/vk-kvartirnik-05.webp" data-photo data-project="ВК Квартирник" aria-label="Открыть фото 2 из 5: Лаунж-зона ВК Квартирника"><span class="shot-frame" data-reveal><img src="../../assets/works/vk-kvartirnik-05.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Лаунж-зона ВК Квартирника" /></span></a>
+            <a class="shot" href="../../assets/works/vk-kvartirnik-03.webp" data-photo data-project="ВК Квартирник" aria-label="Открыть фото 3 из 5: Фотозона ВК Квартирника с подсветкой"><span class="shot-frame" data-reveal><img src="../../assets/works/vk-kvartirnik-03.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Фотозона ВК Квартирника с подсветкой" /></span></a>
+            <a class="shot" href="../../assets/works/vk-kvartirnik-01.webp" data-photo data-project="ВК Квартирник" aria-label="Открыть фото 4 из 5: Сцена ВК Квартирника на открытой площадке"><span class="shot-frame" data-reveal><img src="../../assets/works/vk-kvartirnik-01.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Сцена ВК Квартирника на открытой площадке" /></span></a>
+            <a class="shot" href="../../assets/works/vk-kvartirnik-02.webp" data-photo data-project="ВК Квартирник" aria-label="Открыть фото 5 из 5: Брендированная зона ВК Квартирника"><span class="shot-frame" data-reveal><img src="../../assets/works/vk-kvartirnik-02.webp" width="960" height="1280" loading="lazy" decoding="async" alt="Брендированная зона ВК Квартирника" /></span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-band" data-expand aria-labelledby="cta-title">
+        <div class="wrap cta-inner">
+          <h2 id="cta-title" data-split>Следующий стенд&nbsp;— ваш?</h2>
+          <p data-reveal>Пришлите даты, площадку и&nbsp;примерную площадь&nbsp;— предложим, с&nbsp;чего начать.</p>
+          <a class="pill pill--navy pill--large" href="index.html#contact">Обсудить проект <span class="pill-arrow" aria-hidden="true">↘</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <span class="logo" aria-hidden="true">FRAME<svg class="mark" viewBox="0 0 100 100"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg></span>
+        <p>Телефон, почта и&nbsp;Telegram появятся после согласования.</p>
+        <p><a class="text-link" href="index.html">← На главную</a></p>
+      </div>
+    </footer>
+
+    <dialog class="viewer" data-viewer aria-label="Просмотр фото">
+      <p class="viewer-caption" data-viewer-caption aria-live="polite"></p>
+      <button class="viewer-btn viewer-prev" type="button" data-viewer-prev aria-label="Предыдущее фото">←</button>
+      <button class="viewer-btn viewer-next" type="button" data-viewer-next aria-label="Следующее фото">→</button>
+      <button class="viewer-btn viewer-close" type="button" data-viewer-close aria-label="Закрыть просмотр">×</button>
+    </dialog>
+
+    <script src="../shared.js" defer></script>
+  </body>
+</html>

@@ -290,6 +290,39 @@ document.querySelectorAll("[data-strip]").forEach((wrap) => {
   wrap.querySelector("[data-strip-next]")?.addEventListener("click", () => by(1));
 });
 
+/* Просмотр фото проекта на весь экран: стрелки, клавиатура, Esc (нативный dialog) */
+const viewer = document.querySelector("[data-viewer]");
+if (viewer?.showModal) {
+  const img = document.createElement("img");
+  viewer.prepend(img);
+  const caption = viewer.querySelector("[data-viewer-caption]");
+  let group = [];
+  let index = 0;
+  const show = (i) => {
+    index = (i + group.length) % group.length;
+    const link = group[index];
+    img.src = link.href;
+    img.alt = link.querySelector("img").alt;
+    caption.textContent = `${link.dataset.project} · ${index + 1} из ${group.length}`;
+  };
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("[data-photo]");
+    if (!link || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    group = [...document.querySelectorAll(`[data-photo][data-project="${CSS.escape(link.dataset.project)}"]`)];
+    show(group.indexOf(link));
+    viewer.showModal();
+  });
+  viewer.querySelector("[data-viewer-prev]").addEventListener("click", () => show(index - 1));
+  viewer.querySelector("[data-viewer-next]").addEventListener("click", () => show(index + 1));
+  viewer.querySelector("[data-viewer-close]").addEventListener("click", () => viewer.close());
+  viewer.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") show(index - 1);
+    if (e.key === "ArrowRight") show(index + 1);
+  });
+  viewer.addEventListener("click", (e) => e.target === viewer && viewer.close());
+}
+
 /* Демо-форма: честно сообщает, что ничего не отправляется */
 document.querySelectorAll("[data-demo-form]").forEach((form) =>
   form.addEventListener("submit", (e) => {
