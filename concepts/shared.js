@@ -2,60 +2,54 @@
 const root = document.documentElement;
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/* Знак X ↔ рама. Четыре профиля: в X каждый идёт из центра к углу, в раме лежит по стороне.
-   Вариант «square» — рама-квадрат, «diamond» — рама-ромб по эскизу клиентки (?logo=2).
-   Когда X стал рамой, в профилях проступают отверстия, как у настоящей выставочной рамы. */
+/* Знак X ↔ рама.
+   «sketch» (по эскизу клиентки, по умолчанию в A): X из четырёх профилей с гранью-толщиной. Каждый профиль
+   переворачивается вокруг вертикальной оси — левая половина X «>» становится левым углом рамы «<»,
+   правая — правым, получается рама-ромб; на тыльной стороне профилей сквозные отверстия.
+   Обратно профили переворачиваются разъединёнными («разобранный» X) и сходятся в X.
+   Сделано на CSS 3D + Web Animations API: без библиотек, одна анимация и проигрывается, и прокручивается.
+   «square» (?logo=1, концепт B): плоский X, рама-квадрат с отверстиями (SVG). */
 const mix = (a, b, t) => a + (b - a) * t;
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const X_ENDS = [[8, 8], [92, 8], [92, 92], [8, 92]];
-const FRAMES = {
-  square: [[8, 8], [92, 8], [92, 92], [8, 92]],
-  diamond: [[4, 50], [50, 4], [96, 50], [50, 96]],
-};
+const SQUARE = [[8, 8], [92, 8], [92, 92], [8, 92]];
 const HOLES = [0.24, 0.5, 0.76];
 const SVG_NS = "http://www.w3.org/2000/svg";
-const urlLogo = new URLSearchParams(location.search).get("logo") === "2" ? "diamond" : "square";
+const logoParam = new URLSearchParams(location.search).get("logo");
+const pageLogo = logoParam === "1" ? "square" : logoParam === "2" ? "sketch" : root.dataset.logo || "square";
 
+/* --- Плоский вариант (SVG) --- */
 function setupMark(svg) {
   if (svg.markBars) return;
-  svg.markVariant = svg.dataset.variant || urlLogo;
-  svg.dataset.variant = svg.markVariant;
   svg.textContent = "";
   svg.markBars = X_ENDS.map(() => {
     const g = document.createElementNS(SVG_NS, "g");
     const bar = document.createElementNS(SVG_NS, "line");
-    const groove = document.createElementNS(SVG_NS, "line");
     bar.setAttribute("class", "mark-bar");
-    groove.setAttribute("class", "mark-groove");
     const holes = HOLES.map(() => {
       const c = document.createElementNS(SVG_NS, "circle");
       c.setAttribute("class", "mark-hole");
       c.setAttribute("r", "3.3");
       return c;
     });
-    g.append(bar, groove, ...holes);
+    g.append(bar, ...holes);
     svg.append(g);
-    return { bar, groove, holes };
+    return { bar, holes };
   });
 }
 
 function drawMark(svg, t) {
   setupMark(svg);
-  const frame = FRAMES[svg.markVariant] || FRAMES.square;
   const holeOpacity = Math.min(Math.max((t - 0.72) / 0.28, 0), 1).toFixed(3);
-  svg.markBars.forEach(({ bar, groove, holes }, i) => {
-    const a = frame[i];
-    const b = frame[(i + 1) % 4];
-    const x1 = mix(50, a[0], t);
-    const y1 = mix(50, a[1], t);
-    const x2 = mix(X_ENDS[i][0], b[0], t);
-    const y2 = mix(X_ENDS[i][1], b[1], t);
-    for (const line of [bar, groove]) {
-      line.setAttribute("x1", x1.toFixed(2));
-      line.setAttribute("y1", y1.toFixed(2));
-      line.setAttribute("x2", x2.toFixed(2));
-      line.setAttribute("y2", y2.toFixed(2));
-    }
+  svg.markBars.forEach(({ bar, holes }, i) => {
+    const a = SQUARE[i];
+    const b = SQUARE[(i + 1) % 4];
+    const x1 = mix(50, a[0], t), y1 = mix(50, a[1], t);
+    const x2 = mix(X_ENDS[i][0], b[0], t), y2 = mix(X_ENDS[i][1], b[1], t);
+    bar.setAttribute("x1", x1.toFixed(2));
+    bar.setAttribute("y1", y1.toFixed(2));
+    bar.setAttribute("x2", x2.toFixed(2));
+    bar.setAttribute("y2", y2.toFixed(2));
     holes.forEach((hole, k) => {
       hole.setAttribute("cx", mix(x1, x2, HOLES[k]).toFixed(2));
       hole.setAttribute("cy", mix(y1, y2, HOLES[k]).toFixed(2));
@@ -64,20 +58,134 @@ function drawMark(svg, t) {
   });
 }
 
-function tween(svg, from, to, duration, isCancelled = () => skipped) {
+function tween(svg, from, to, duration) {
   return new Promise((resolve) => {
     const start = performance.now();
     const step = (now) => {
       const t = Math.min((now - start) / duration, 1);
       drawMark(svg, mix(from, to, ease(t)));
-      if (t < 1 && !isCancelled()) requestAnimationFrame(step);
-      else resolve();
+      t < 1 ? requestAnimationFrame(step) : resolve();
     };
     requestAnimationFrame(step);
   });
 }
 
-document.querySelectorAll("[data-mark], [data-scroll-mark], [data-hero-mark]").forEach((svg) => drawMark(svg, 0));
+function svgController(svg) {
+  drawMark(svg, 0);
+  return {
+    frameAt: 0.5,
+    // p: 0 — X, 0.5 — рама, 1 — снова X
+    seek: (p) => drawMark(svg, p <= 0.5 ? ease(p * 2) : ease((1 - p) * 2)),
+    async play() {
+      await tween(svg, 0, 1, 560);
+      await sleep(520);
+      await tween(svg, 1, 0, 460);
+    },
+  };
+}
+
+/* --- Объёмный вариант по эскизу (CSS 3D + Web Animations) --- */
+const SKETCH_T = 2200; // полный цикл X → рама → X, мс
+// Профили в порядке эскиза: левый верхний, правый верхний, левый нижний, правый нижний.
+// cx, cy — центр профиля в долях знака (0–100), r — наклон, dir — куда «наружу» вдоль профиля.
+const ARMS = [
+  { cx: 29, cy: 29, r: 45, dir: -1 },
+  { cx: 71, cy: 29, r: -45, dir: 1 },
+  { cx: 29, cy: 71, r: -45, dir: -1 },
+  { cx: 71, cy: 71, r: 45, dir: 1 },
+];
+const SMOOTH = "cubic-bezier(0.65, 0, 0.35, 1)";
+
+function sketchController(svg) {
+  const box = document.createElement("span");
+  box.className = `${svg.getAttribute("class") || ""} mark3d`;
+  box.setAttribute("aria-hidden", "true");
+  if (svg.getAttribute("style")) box.setAttribute("style", svg.getAttribute("style"));
+  Object.assign(box.dataset, svg.dataset);
+  const inner = document.createElement("span");
+  inner.className = "mark3d-inner";
+  box.append(inner);
+  svg.replaceWith(box);
+
+  const at = (ms) => Math.min(ms / SKETCH_T, 1);
+  const pose = (r, flip, out, dir) => `rotateY(${flip}deg) rotateZ(${r}deg) translateX(${((out * dir * 100) / 76.4).toFixed(2)}%)`;
+  const animations = ARMS.map((arm, i) => {
+    const el = document.createElement("span");
+    el.className = "arm";
+    el.style.setProperty("--cx", arm.cx);
+    el.style.setProperty("--cy", arm.cy);
+    el.innerHTML = '<i class="f-front"></i><i class="f-back"></i>';
+    inner.append(el);
+    const s = i * 80; // профили срабатывают по очереди, как на эскизе
+    return el.animate(
+      [
+        { offset: 0, transform: pose(arm.r, 0, 0, arm.dir), easing: SMOOTH },
+        { offset: at(200), transform: pose(arm.r, 0, 6, arm.dir), easing: SMOOTH }, // X разделяется на профили
+        { offset: at(200 + s), transform: pose(arm.r, 0, 6, arm.dir), easing: SMOOTH },
+        { offset: at(720 + s), transform: pose(arm.r, 180, 0, arm.dir), easing: SMOOTH }, // переворот: рама-ромб
+        { offset: at(1250 + s), transform: pose(arm.r, 180, 0, arm.dir), easing: SMOOTH },
+        { offset: at(1720 + s), transform: pose(arm.r, 360, 13, arm.dir), easing: SMOOTH }, // «разобранный» X
+        { offset: 1, transform: pose(arm.r, 360, 0, arm.dir) }, // профили сходятся в X
+      ],
+      { duration: SKETCH_T, fill: "both" }
+    );
+  });
+  // Лицевая и тыльная (с отверстиями) стороны меняются, когда профиль стоит ребром (90°):
+  // не полагаемся на backface-visibility — в Safari он ненадёжен внутри 3D.
+  inner.querySelectorAll(".arm").forEach((el, i) => {
+    const s = i * 80;
+    const flipA = 460 + s; // середина переворота X → рама
+    const flipB = 1485 + s; // середина переворота рама → X
+    const eps = 0.001;
+    const swap = (front) => [
+      { offset: 0, opacity: front ? 1 : 0 },
+      { offset: at(flipA), opacity: front ? 1 : 0 },
+      { offset: at(flipA) + eps, opacity: front ? 0 : 1 },
+      { offset: at(flipB), opacity: front ? 0 : 1 },
+      { offset: at(flipB) + eps, opacity: front ? 1 : 0 },
+      { offset: 1, opacity: front ? 1 : 0 },
+    ];
+    animations.push(el.querySelector(".f-front").animate(swap(true), { duration: SKETCH_T, fill: "both" }));
+    animations.push(el.querySelector(".f-back").animate(swap(false), { duration: SKETCH_T, fill: "both" }));
+  });
+  // В момент рамы знак слегка разворачивается в перспективе — видна толщина профилей, как на эскизе
+  animations.push(
+    inner.animate(
+      [
+        { offset: 0, transform: "rotateX(0deg) rotateY(0deg)" },
+        { offset: at(820), transform: "rotateX(0deg) rotateY(0deg)", easing: SMOOTH },
+        { offset: at(1050), transform: "rotateX(18deg) rotateY(-24deg)" },
+        { offset: at(1300), transform: "rotateX(18deg) rotateY(-24deg)", easing: SMOOTH },
+        { offset: at(1550), transform: "rotateX(0deg) rotateY(0deg)" },
+        { offset: 1, transform: "rotateX(0deg) rotateY(0deg)" },
+      ],
+      { duration: SKETCH_T, fill: "both" }
+    )
+  );
+  animations.forEach((a) => a.pause());
+  const seekMs = (ms) => animations.forEach((a) => (a.currentTime = ms));
+  seekMs(0);
+  return {
+    box,
+    frameAt: 1000 / SKETCH_T,
+    seek: (p) => seekMs(Math.min(Math.max(p, 0), 1) * SKETCH_T),
+    play() {
+      animations.forEach((a) => {
+        a.currentTime = 0;
+        a.play();
+      });
+      return Promise.all(animations.map((a) => a.finished)).catch(() => {});
+    },
+  };
+}
+
+// Знаки, которые двигаются: заставка, первый экран, лента бренда, витрина на странице выбора
+document.querySelectorAll("[data-mark], [data-scroll-mark], [data-hero-mark], [data-mark-demo] svg").forEach((svg) => {
+  const variant = svg.dataset.variant || pageLogo;
+  const useSketch = variant === "sketch" && "animate" in Element.prototype;
+  const ctl = useSketch ? sketchController(svg) : svgController(svg);
+  (ctl.box || svg).mark = ctl;
+});
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const wait = (ms) => sleep(skipped ? 0 : ms);
@@ -149,9 +257,7 @@ async function playIntro() {
   const mark = intro.querySelector("[data-mark]");
   intro.classList.add("is-playing");
   await wait(+intro.dataset.introDelay || 700); // буквы F-R-A-M-E появляются по очереди (CSS)
-  await tween(mark, 0, 1, 560); // X → рама
-  await wait(520); // пауза, чтобы разглядеть раму с отверстиями
-  await tween(mark, 1, 0, 460); // рама → X
+  if (!skipped) await mark.mark.play(); // X → рама с отверстиями → X
   const sign = intro.querySelector("[data-type]");
   if (sign) await typeText(sign, 55, () => skipped);
   await wait(sign ? 380 : 200);
@@ -268,7 +374,7 @@ function onScroll() {
     if (r.bottom < 0 || r.top > vh) return;
     const q = clamp01((vh - r.top) / (vh + r.height));
     el.style.setProperty("--q", q.toFixed(4));
-    if (mark) drawMark(mark, ease(Math.sin(q * Math.PI)));
+    mark?.mark?.seek(q);
   });
   // Глубина: фото внутри рамок смещаются медленнее страницы
   depth.forEach((img) => {
@@ -277,7 +383,7 @@ function onScroll() {
     const shift = ((r.top + r.height / 2 - vh / 2) * -(+img.dataset.speed || 0.08)).toFixed(1);
     img.style.translate = `0 ${shift}px`;
   });
-  if (heroMark) drawMark(heroMark, ease(clamp01(y / (vh * 0.55))));
+  heroMark?.mark?.seek(clamp01(y / (vh * 0.55)) * heroMark.mark.frameAt);
   if (frameHero) {
     const r = frameHero.getBoundingClientRect();
     const range = r.height - innerHeight;
@@ -380,17 +486,12 @@ if (viewer?.showModal) {
   viewer.addEventListener("click", (e) => e.target === viewer && viewer.close());
 }
 
-/* Знаки на странице выбора: X → рама → X по кнопке «Повторить» */
-document.querySelectorAll("[data-mark-demo]").forEach((box) => {
-  const svg = box.querySelector("svg");
-  const play = async () => {
-    if (reduceMotion) return drawMark(svg, 1);
-    await tween(svg, 0, 1, 700, () => false);
-    await sleep(900);
-    await tween(svg, 1, 0, 600, () => false);
-  };
-  box.querySelector("button")?.addEventListener("click", play);
-  setTimeout(play, 600);
+/* Знаки на странице выбора: X → рама → X сразу и по кнопке «Повторить» */
+document.querySelectorAll("[data-mark-demo]").forEach((card) => {
+  const mark = card.querySelector(".mark").mark;
+  const play = () => (reduceMotion ? mark.seek(mark.frameAt) : mark.play());
+  card.querySelector("button")?.addEventListener("click", play);
+  setTimeout(play, 700);
 });
 
 /* Выбор файлов в демо-форме: показываем имена, сами файлы никуда не уходят */
