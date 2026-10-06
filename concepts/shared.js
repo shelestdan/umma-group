@@ -2,38 +2,82 @@
 const root = document.documentElement;
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/* X ↔ рама. Четыре отрезка: в X каждый идёт из центра к углу,
-   в раме — от угла к следующему углу. Промежуточные кадры дают «поворот» линий. */
-const corners = [[8, 8], [92, 8], [92, 92], [8, 92]];
-const center = [50, 50];
+/* Знак X ↔ рама. Четыре профиля: в X каждый идёт из центра к углу, в раме лежит по стороне.
+   Вариант «square» — рама-квадрат, «diamond» — рама-ромб по эскизу клиентки (?logo=2).
+   Когда X стал рамой, в профилях проступают отверстия, как у настоящей выставочной рамы. */
 const mix = (a, b, t) => a + (b - a) * t;
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+const X_ENDS = [[8, 8], [92, 8], [92, 92], [8, 92]];
+const FRAMES = {
+  square: [[8, 8], [92, 8], [92, 92], [8, 92]],
+  diamond: [[4, 50], [50, 4], [96, 50], [50, 96]],
+};
+const HOLES = [0.24, 0.5, 0.76];
+const SVG_NS = "http://www.w3.org/2000/svg";
+const urlLogo = new URLSearchParams(location.search).get("logo") === "2" ? "diamond" : "square";
 
-function markPath(t) {
-  return corners
-    .map((corner, i) => {
-      const next = corners[(i + 1) % 4];
-      const x1 = mix(center[0], corner[0], t);
-      const y1 = mix(center[1], corner[1], t);
-      const x2 = mix(corner[0], next[0], t);
-      const y2 = mix(corner[1], next[1], t);
-      return `M${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}`;
-    })
-    .join("");
+function setupMark(svg) {
+  if (svg.markBars) return;
+  svg.markVariant = svg.dataset.variant || urlLogo;
+  svg.dataset.variant = svg.markVariant;
+  svg.textContent = "";
+  svg.markBars = X_ENDS.map(() => {
+    const g = document.createElementNS(SVG_NS, "g");
+    const bar = document.createElementNS(SVG_NS, "line");
+    const groove = document.createElementNS(SVG_NS, "line");
+    bar.setAttribute("class", "mark-bar");
+    groove.setAttribute("class", "mark-groove");
+    const holes = HOLES.map(() => {
+      const c = document.createElementNS(SVG_NS, "circle");
+      c.setAttribute("class", "mark-hole");
+      c.setAttribute("r", "3.3");
+      return c;
+    });
+    g.append(bar, groove, ...holes);
+    svg.append(g);
+    return { bar, groove, holes };
+  });
 }
 
-function tween(path, from, to, duration) {
+function drawMark(svg, t) {
+  setupMark(svg);
+  const frame = FRAMES[svg.markVariant] || FRAMES.square;
+  const holeOpacity = Math.min(Math.max((t - 0.72) / 0.28, 0), 1).toFixed(3);
+  svg.markBars.forEach(({ bar, groove, holes }, i) => {
+    const a = frame[i];
+    const b = frame[(i + 1) % 4];
+    const x1 = mix(50, a[0], t);
+    const y1 = mix(50, a[1], t);
+    const x2 = mix(X_ENDS[i][0], b[0], t);
+    const y2 = mix(X_ENDS[i][1], b[1], t);
+    for (const line of [bar, groove]) {
+      line.setAttribute("x1", x1.toFixed(2));
+      line.setAttribute("y1", y1.toFixed(2));
+      line.setAttribute("x2", x2.toFixed(2));
+      line.setAttribute("y2", y2.toFixed(2));
+    }
+    holes.forEach((hole, k) => {
+      hole.setAttribute("cx", mix(x1, x2, HOLES[k]).toFixed(2));
+      hole.setAttribute("cy", mix(y1, y2, HOLES[k]).toFixed(2));
+      hole.setAttribute("opacity", holeOpacity);
+    });
+  });
+}
+
+function tween(svg, from, to, duration, isCancelled = () => skipped) {
   return new Promise((resolve) => {
     const start = performance.now();
     const step = (now) => {
       const t = Math.min((now - start) / duration, 1);
-      path.setAttribute("d", markPath(mix(from, to, ease(t))));
-      if (t < 1 && !skipped) requestAnimationFrame(step);
+      drawMark(svg, mix(from, to, ease(t)));
+      if (t < 1 && !isCancelled()) requestAnimationFrame(step);
       else resolve();
     };
     requestAnimationFrame(step);
   });
 }
+
+document.querySelectorAll("[data-mark], [data-scroll-mark], [data-hero-mark]").forEach((svg) => drawMark(svg, 0));
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const wait = (ms) => sleep(skipped ? 0 : ms);
@@ -98,16 +142,16 @@ async function playIntro() {
   document.addEventListener("visibilitychange", () => document.hidden && finishIntro());
   pageParts.forEach((el) => (el.inert = true));
   const skip = intro.querySelector("[data-intro-skip]");
-  skip.addEventListener("click", finishIntro);
+  skip?.addEventListener("click", finishIntro);
   document.addEventListener("keydown", (e) => e.key === "Escape" && finishIntro(), { once: true });
-  skip.focus({ preventScroll: true });
+  skip?.focus({ preventScroll: true });
 
-  const path = intro.querySelector("[data-mark] path");
+  const mark = intro.querySelector("[data-mark]");
   intro.classList.add("is-playing");
   await wait(+intro.dataset.introDelay || 700); // буквы F-R-A-M-E появляются по очереди (CSS)
-  await tween(path, 0, 1, 520); // X → рама
-  await wait(320);
-  await tween(path, 1, 0, 440); // рама → X
+  await tween(mark, 0, 1, 560); // X → рама
+  await wait(520); // пауза, чтобы разглядеть раму с отверстиями
+  await tween(mark, 1, 0, 460); // рама → X
   const sign = intro.querySelector("[data-type]");
   if (sign) await typeText(sign, 55, () => skipped);
   await wait(sign ? 380 : 200);
@@ -194,7 +238,8 @@ let ticking = false;
 const parallax = document.querySelectorAll("[data-parallax]");
 const frameHero = document.querySelector("[data-frame-hero]");
 const expands = document.querySelectorAll("[data-expand]");
-const marquees = [...document.querySelectorAll("[data-marquee]")].map((el) => ({ el, mark: el.querySelector("[data-scroll-mark] path") }));
+const marquees = [...document.querySelectorAll("[data-marquee]")].map((el) => ({ el, mark: el.querySelector("[data-scroll-mark]") }));
+const heroMark = document.querySelector("[data-hero-mark]");
 const depth = document.querySelectorAll("[data-speed]");
 const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
 
@@ -223,7 +268,7 @@ function onScroll() {
     if (r.bottom < 0 || r.top > vh) return;
     const q = clamp01((vh - r.top) / (vh + r.height));
     el.style.setProperty("--q", q.toFixed(4));
-    if (mark) mark.setAttribute("d", markPath(ease(Math.sin(q * Math.PI))));
+    if (mark) drawMark(mark, ease(Math.sin(q * Math.PI)));
   });
   // Глубина: фото внутри рамок смещаются медленнее страницы
   depth.forEach((img) => {
@@ -232,6 +277,7 @@ function onScroll() {
     const shift = ((r.top + r.height / 2 - vh / 2) * -(+img.dataset.speed || 0.08)).toFixed(1);
     img.style.translate = `0 ${shift}px`;
   });
+  if (heroMark) drawMark(heroMark, ease(clamp01(y / (vh * 0.55))));
   if (frameHero) {
     const r = frameHero.getBoundingClientRect();
     const range = r.height - innerHeight;
@@ -333,6 +379,27 @@ if (viewer?.showModal) {
   });
   viewer.addEventListener("click", (e) => e.target === viewer && viewer.close());
 }
+
+/* Знаки на странице выбора: X → рама → X по кнопке «Повторить» */
+document.querySelectorAll("[data-mark-demo]").forEach((box) => {
+  const svg = box.querySelector("svg");
+  const play = async () => {
+    if (reduceMotion) return drawMark(svg, 1);
+    await tween(svg, 0, 1, 700, () => false);
+    await sleep(900);
+    await tween(svg, 1, 0, 600, () => false);
+  };
+  box.querySelector("button")?.addEventListener("click", play);
+  setTimeout(play, 600);
+});
+
+/* Выбор файлов в демо-форме: показываем имена, сами файлы никуда не уходят */
+document.querySelectorAll("[data-file-input]").forEach((input) => {
+  const list = input.parentElement.querySelector("[data-file-list]");
+  input.addEventListener("change", () => {
+    list.textContent = [...input.files].map((f) => f.name).join(", ");
+  });
+});
 
 /* Демо-форма: честно сообщает, что ничего не отправляется */
 document.querySelectorAll("[data-demo-form]").forEach((form) =>

@@ -552,3 +552,11 @@ details p { overflow: hidden; padding: 0 0 26px; color: var(--muted); max-width:
   .gallery--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .gallery--5 .shot-frame { padding: 10px; }
 }
+
+/* Анимированный знак: четыре профиля и отверстия цвета фона */
+.mark .mark-bar { stroke: currentColor; stroke-width: 17; stroke-linecap: square; }
+.mark .mark-groove { display: none; stroke: rgba(255, 255, 255, 0.4); stroke-width: 2.4; }
+.mark[data-variant="diamond"] .mark-bar { stroke-width: 15; }
+.mark[data-variant="diamond"] .mark-groove { display: inline; }
+.mark .mark-hole { fill: var(--hole, var(--paper)); }
+.brandband .mark { --hole: var(--navy); }

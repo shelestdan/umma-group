@@ -27,6 +27,17 @@
       ul { margin: 0; padding-left: 20px; color: #55565d; }
       .notes { max-width: 72ch; margin-top: 40px; }
       .notes h2 { font-size: 22px; margin-bottom: 10px; }
+      .logos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px; margin-top: 18px; }
+      .logo-card { display: grid; gap: 14px; justify-items: start; padding: 28px; background: #fff; border: 1px solid #e3e1dc; }
+      .logo-word { display: inline-flex; align-items: baseline; font-weight: 800; font-size: clamp(44px, 7vw, 76px); line-height: 1; letter-spacing: 0.01em; color: #16171b; }
+      .logo-word .mark { display: inline-block; width: 0.76em; height: 0.71em; margin-left: 0.04em; overflow: visible; color: #6526d9; --hole: #fff; }
+      .mark .mark-bar { stroke: currentColor; stroke-width: 17; stroke-linecap: square; }
+      .mark .mark-groove { display: none; stroke: rgba(255, 255, 255, 0.4); stroke-width: 2.4; }
+      .mark[data-variant="diamond"] .mark-bar { stroke-width: 15; }
+      .mark[data-variant="diamond"] .mark-groove { display: inline; }
+      .mark .mark-hole { fill: var(--hole); }
+      .replay { min-height: 44px; padding: 0 18px; border: 1px solid #1a1b1f; background: transparent; font: inherit; font-weight: 600; cursor: pointer; }
+      .replay:hover { background: #1a1b1f; color: #fff; }
     </style>
   </head>
   <body>
@@ -35,8 +46,8 @@
     <div class="grid">
       <article>
         <h2>A+ · «Светлый зал»</h2>
-        <div class="sw" aria-hidden="true"><span style="background: #f4f2ee"></span><span style="background: #17181c"></span><span style="background: #1f2126"></span><span style="background: #6526d9"></span></div>
-        <p>Ближе к Foxlab: фото проекта на весь первый экран под прозрачной шапкой, крупный плотный гротеск, лента бренда при прокрутке, строки услуг с фото, огромная кнопка «Обсудить проект». Фиолетовый из логотипа — в действиях и знаке X.</p>
+        <div class="sw" aria-hidden="true"><span style="background: #f4f2ee"></span><span style="background: #16171b"></span><span style="background: #6526d9"></span><span style="background: #ff5a36"></span><span style="background: #ece7f8"></span></div>
+        <p>Светлый первый экран с крупным заголовком и знаком, который при прокрутке становится рамой. Фиолетовый из логотипа — для действий, коралловый — для выделений и блока «Рассчитать стенд», сиреневый — фон вопросов. Лента бренда, строки услуг, форма с размером стенда и файлом.</p>
         <div class="links"><a class="open" href="a/?intro">Открыть концепт A</a><a href="a/">без заставки (если уже видели)</a></div>
       </article>
       <article>
@@ -47,16 +58,35 @@
       </article>
     </div>
     <section class="notes">
+      <h2>Логотип: два варианта рамы</h2>
+      <p class="lead" style="margin: 0">X собирается из четырёх профилей и превращается в раму с отверстиями, как у настоящей выставочной рамы, а потом обратно в X.</p>
+      <div class="logos">
+        <div class="logo-card" data-mark-demo>
+          <span class="logo-word" aria-hidden="true">FRAME<svg class="mark" data-variant="square" viewBox="0 0 100 100"></svg></span>
+          <p><strong>Вариант 1.</strong> Рама-квадрат, отверстия в профилях.</p>
+          <button class="replay" type="button">Повторить</button>
+          <a href="a/?intro">Заставка A с этим вариантом</a>
+        </div>
+        <div class="logo-card" data-mark-demo>
+          <span class="logo-word" aria-hidden="true">FRAME<svg class="mark" data-variant="diamond" viewBox="0 0 100 100"></svg></span>
+          <p><strong>Вариант 2 по эскизу.</strong> Профили разворачиваются в раму-ромб.</p>
+          <button class="replay" type="button">Повторить</button>
+          <a href="a/?intro&amp;logo=2">Заставка A с этим вариантом</a>
+        </div>
+      </div>
+    </section>
+    <section class="notes">
       <h2>Что важно знать при просмотре</h2>
       <ul>
-        <li>Подпись «фреймекс» — пример места и стиля. Написание, шрифт и расположение не утверждены.</li>
+        <li>Подпись «фреймикс» — пример места и стиля. Написание, шрифт и расположение не утверждены.</li>
         <li>У концептов разная анимация текста. A: слова заголовков выезжают снизу, слоган печатается по буквам. B: по словам проходит цветная плашка, слоган проявляется из размытия.</li>
-        <li>Заставки тоже разные. A: буквы выезжают, X становится рамой и обратно, печатается «фреймекс», заставка уезжает вверх. B: буквы открывают коралловые плашки, X влетает с поворотом, становится рамой и обратно, затем из X раскрывается синее окно и переходит в первый экран.</li>
-        <li>Заставка показывается один раз за сеанс, её можно пропустить кнопкой или клавишей Esc. При системной настройке «уменьшить движение» заставки нет.</li>
+        <li>Заставки тоже разные. A: буквы выезжают, X становится рамой и обратно, печатается «фреймикс», заставка уезжает вверх. B: буквы открывают коралловые плашки, X влетает с поворотом, становится рамой и обратно, затем из X раскрывается синее окно и переходит в первый экран.</li>
+        <li>Заставка показывается один раз за сеанс. В A кнопки «Пропустить» больше нет — по просьбе клиентки; клавиша Esc для клавиатуры остаётся. При системной настройке «уменьшить движение» заставки нет.</li>
         <li>Тексты — редакторская версия черновиков из брифа и блока «О нас». Исправлено: «во впечатления»; лишняя «э» перед «превращая» убрана.</li>
         <li>В концепте B одна карточка — пример того, как подписывать ИИ-визуализации. Это не проект FRAMEX.</li>
         <li>Формы демонстрационные: ничего не отправляют.</li>
       </ul>
     </section>
+    <script src="shared.js" defer></script>
   </body>
 </html>
