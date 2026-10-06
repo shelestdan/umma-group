@@ -558,25 +558,3 @@ details p { overflow: hidden; padding: 0 0 26px; color: var(--muted); max-width:
 .mark .mark-hole { fill: var(--hole, var(--paper)); }
 .brandband .mark { --hole: var(--navy); }
 
-/* Знак по эскизу: четыре профиля, которые переворачиваются в 3D (CSS 3D + Web Animations). --s — размер знака */
-.mark3d { --s: 0.71em; position: relative; display: inline-block; width: 0.76em; height: 0.71em; perspective: calc(var(--s) * 4); }
-.mark3d-inner { position: absolute; top: 0; left: 50%; width: var(--s); height: var(--s); margin-left: calc(var(--s) / -2); transform-style: preserve-3d; }
-.mark3d .arm {
-  position: absolute; width: calc(var(--s) * 0.764); height: calc(var(--s) * 0.17);
-  left: calc(var(--s) * (var(--cx) - 38.2) / 100); top: calc(var(--s) * (var(--cy) - 8.5) / 100);
-  transform-style: preserve-3d;
-}
-/* Профиль: лицевая сторона и тёмная грань по длинной стороне — толщина, как на эскизе */
-.mark3d .arm > i {
-  position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden;
-  transform: translateZ(calc(var(--s) * 0.006));
-  background: linear-gradient(to bottom, currentColor 0 74%, color-mix(in srgb, currentColor 62%, #000) 74%);
-}
-/* Тыльная сторона со сквозными отверстиями — её видно, когда X перевернулся в раму */
-.mark3d .arm > .f-back {
-  transform: rotateY(180deg) translateZ(calc(var(--s) * 0.006));
-  /* отверстия рисуются цветом фона (--hole): маска в перевёрнутой 3D-грани не работает в Safari */
-  background:
-    radial-gradient(circle closest-side, var(--hole, #fff) 0 44%, transparent 48%) 0 0 / 33.334% 100% repeat-x,
-    linear-gradient(to bottom, currentColor 0 74%, color-mix(in srgb, currentColor 62%, #000) 74%);
-}

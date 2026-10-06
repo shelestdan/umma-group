@@ -3,11 +3,11 @@ const root = document.documentElement;
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* Знак X ↔ рама.
-   «sketch» (по эскизу клиентки, по умолчанию в A): X из четырёх профилей с гранью-толщиной. Каждый профиль
-   переворачивается вокруг вертикальной оси — левая половина X «>» становится левым углом рамы «<»,
-   правая — правым, получается рама-ромб; на тыльной стороне профилей сквозные отверстия.
-   Обратно профили переворачиваются разъединёнными («разобранный» X) и сходятся в X.
-   Сделано на CSS 3D + Web Animations API: без библиотек, одна анимация и проигрывается, и прокручивается.
+   «sketch» (по эскизу клиентки, по умолчанию в A): X из четырёх объёмных профилей. X разбирается, профили
+   по очереди (левый верхний, правый верхний, левый нижний, правый нижний) переворачиваются вокруг вертикальной
+   оси — половина X «>» становится углом рамы «<»; рама-ромб с отверстиями собирается, разворачивается
+   в перспективе и тем же путём возвращается в X. Без библиотек: проекция в SVG, кадр зависит только от времени,
+   поэтому анимация и проигрывается, и прокручивается.
    «square» (?logo=1, концепт B): плоский X, рама-квадрат с отверстиями (SVG). */
 const mix = (a, b, t) => a + (b - a) * t;
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
@@ -84,97 +84,137 @@ function svgController(svg) {
   };
 }
 
-/* --- Объёмный вариант по эскизу (CSS 3D + Web Animations) --- */
+/* --- Объёмный вариант по эскизу: маленький 3D-рендер в SVG ---
+   Четыре настоящих профиля рамы (ширина, глубина, торцы «на ус»). На каждом кадре вершины
+   поворачиваются и проецируются, невидимые грани отбрасываются, ближние профили рисуются поверх дальних.
+   Получается чистый вектор без «бумажных» рёбер, одинаковый во всех браузерах; отверстия вырезаны из грани. */
 const SKETCH_T = 2200; // полный цикл X → рама → X, мс
+const PR = { w: 15, d: 10, rx: 50, ry: 48, ex: 16, ef: 7, fit: 0.94 }; // ширина и глубина профиля, полуоси ромба, разлёт X и рамы, масштаб рамы
+const RH = Math.hypot(PR.rx, PR.ry);
+const RX_IN = PR.rx - (PR.w * RH) / PR.ry; // внутренний ромб: толщина по горизонтали w/sinθ
+const RY_IN = PR.ry - (PR.w * RH) / PR.rx; // и по вертикали w/cosθ
+const SHIFT = (PR.rx - RX_IN) / 2; // сдвиг половинок, чтобы перевёрнутые «>» и «<» сложились в X
 // Профили в порядке эскиза: левый верхний, правый верхний, левый нижний, правый нижний.
-// cx, cy — центр профиля в долях знака (0–100), r — наклон, dir — куда «наружу» вдоль профиля.
-const ARMS = [
-  { cx: 29, cy: 29, r: 45, dir: -1 },
-  { cx: 71, cy: 29, r: -45, dir: 1 },
-  { cx: 29, cy: 71, r: -45, dir: -1 },
-  { cx: 71, cy: 71, r: 45, dir: 1 },
-];
-const SMOOTH = "cubic-bezier(0.65, 0, 0.35, 1)";
+// Внешняя и внутренняя вершины ромба на каждом торце: торцы горизонтальные слева/справа, вертикальные сверху/снизу.
+const RHOMB = (rx, ry) => ({ L: [50 - rx, 50], T: [50, 50 - ry], R: [50 + rx, 50], B: [50, 50 + ry] });
+const OUT = RHOMB(PR.rx, PR.ry);
+const IN = RHOMB(RX_IN, RY_IN);
+const PROFILES = [["L", "T"], ["T", "R"], ["L", "B"], ["B", "R"]].map(([a, b], i) => ({
+  quad: [OUT[a], OUT[b], IN[b], IN[a]],
+  ends: [[OUT[a], IN[a]], [OUT[b], IN[b]]],
+  side: i % 2 ? -1 : 1, // левые профили (составляют «>») и правые («<»)
+}));
+const easeIO = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+// значение на отрезке времени [a, b]: от 0 до 1 с плавным разгоном и торможением
+const span = (ms, a, b) => easeIO((ms - a) / (b - a));
+
+// Раскадровка (мс): 0–200 X разбирается; 200–850 профили по очереди переворачиваются в раму;
+// 820–1020 рама собирается; 860–1120 разворот в перспективе; 1380 обратно: разбор, переворот, X.
+function sketchPose(ms) {
+  const flipIn = (i) => span(ms, 200 + i * 70, 640 + i * 70);
+  const flipOut = (i) => span(ms, 1500 + i * 70, 1900 + i * 70);
+  const ex = span(ms, 0, 200) - span(ms, 820, 1020) + span(ms, 1380, 1560) - span(ms, 2000, 2200);
+  const tilt = span(ms, 860, 1120) - span(ms, 1380, 1600);
+  return { ex, tilt, arms: PROFILES.map((_, i) => flipIn(i) - flipOut(i)) }; // 0 — X, 1 — рама
+}
 
 function sketchController(svg) {
-  const box = document.createElement("span");
-  box.className = `${svg.getAttribute("class") || ""} mark3d`;
-  box.setAttribute("aria-hidden", "true");
-  if (svg.getAttribute("style")) box.setAttribute("style", svg.getAttribute("style"));
-  Object.assign(box.dataset, svg.dataset);
-  const inner = document.createElement("span");
-  inner.className = "mark3d-inner";
-  box.append(inner);
-  svg.replaceWith(box);
+  svg.textContent = "";
+  svg.style.overflow = "visible";
+  const holes = (p) => {
+    const [[a1, a2], [b1, b2]] = p.ends;
+    const m1 = [(a1[0] + a2[0]) / 2, (a1[1] + a2[1]) / 2];
+    const m2 = [(b1[0] + b2[0]) / 2, (b1[1] + b2[1]) / 2];
+    return [0.27, 0.5, 0.73].map((f) => [mix(m1[0], m2[0], f), mix(m1[1], m2[1], f)]);
+  };
+  const parts = PROFILES.map((p) => {
+    const g = document.createElementNS(SVG_NS, "g");
+    const faces = Array.from({ length: 6 }, () => g.appendChild(document.createElementNS(SVG_NS, "path")));
+    svg.append(g);
+    const xs = p.quad.map((v) => v[0]);
+    return { ...p, g, faces, cx: (Math.min(...xs) + Math.max(...xs)) / 2, holes: holes(p) };
+  });
+  const H = PR.d / 2;
 
-  const at = (ms) => Math.min(ms / SKETCH_T, 1);
-  const pose = (r, flip, out, dir) => `rotateY(${flip}deg) rotateZ(${r}deg) translateX(${((out * dir * 100) / 76.4).toFixed(2)}%)`;
-  const animations = ARMS.map((arm, i) => {
-    const el = document.createElement("span");
-    el.className = "arm";
-    el.style.setProperty("--cx", arm.cx);
-    el.style.setProperty("--cy", arm.cy);
-    el.innerHTML = '<i class="f-front"></i><i class="f-back"></i>';
-    inner.append(el);
-    const s = i * 80; // профили срабатывают по очереди, как на эскизе
-    return el.animate(
-      [
-        { offset: 0, transform: pose(arm.r, 0, 0, arm.dir), easing: SMOOTH },
-        { offset: at(200), transform: pose(arm.r, 0, 6, arm.dir), easing: SMOOTH }, // X разделяется на профили
-        { offset: at(200 + s), transform: pose(arm.r, 0, 6, arm.dir), easing: SMOOTH },
-        { offset: at(720 + s), transform: pose(arm.r, 180, 0, arm.dir), easing: SMOOTH }, // переворот: рама-ромб
-        { offset: at(1250 + s), transform: pose(arm.r, 180, 0, arm.dir), easing: SMOOTH },
-        { offset: at(1720 + s), transform: pose(arm.r, 360, 13, arm.dir), easing: SMOOTH }, // «разобранный» X
-        { offset: 1, transform: pose(arm.r, 360, 0, arm.dir) }, // профили сходятся в X
-      ],
-      { duration: SKETCH_T, fill: "both" }
-    );
-  });
-  // Лицевая и тыльная (с отверстиями) стороны меняются, когда профиль стоит ребром (90°):
-  // не полагаемся на backface-visibility — в Safari он ненадёжен внутри 3D.
-  inner.querySelectorAll(".arm").forEach((el, i) => {
-    const s = i * 80;
-    const flipA = 460 + s; // середина переворота X → рама
-    const flipB = 1485 + s; // середина переворота рама → X
-    const eps = 0.001;
-    const swap = (front) => [
-      { offset: 0, opacity: front ? 1 : 0 },
-      { offset: at(flipA), opacity: front ? 1 : 0 },
-      { offset: at(flipA) + eps, opacity: front ? 0 : 1 },
-      { offset: at(flipB), opacity: front ? 0 : 1 },
-      { offset: at(flipB) + eps, opacity: front ? 1 : 0 },
-      { offset: 1, opacity: front ? 1 : 0 },
-    ];
-    animations.push(el.querySelector(".f-front").animate(swap(true), { duration: SKETCH_T, fill: "both" }));
-    animations.push(el.querySelector(".f-back").animate(swap(false), { duration: SKETCH_T, fill: "both" }));
-  });
-  // В момент рамы знак слегка разворачивается в перспективе — видна толщина профилей, как на эскизе
-  animations.push(
-    inner.animate(
-      [
-        { offset: 0, transform: "rotateX(0deg) rotateY(0deg)" },
-        { offset: at(820), transform: "rotateX(0deg) rotateY(0deg)", easing: SMOOTH },
-        { offset: at(1050), transform: "rotateX(18deg) rotateY(-24deg)" },
-        { offset: at(1300), transform: "rotateX(18deg) rotateY(-24deg)", easing: SMOOTH },
-        { offset: at(1550), transform: "rotateX(0deg) rotateY(0deg)" },
-        { offset: 1, transform: "rotateX(0deg) rotateY(0deg)" },
-      ],
-      { duration: SKETCH_T, fill: "both" }
-    )
-  );
-  animations.forEach((a) => a.pause());
-  const seekMs = (ms) => animations.forEach((a) => (a.currentTime = ms));
-  seekMs(0);
-  return {
-    box,
-    frameAt: 1000 / SKETCH_T,
-    seek: (p) => seekMs(Math.min(Math.max(p, 0), 1) * SKETCH_T),
-    play() {
-      animations.forEach((a) => {
-        a.currentTime = 0;
-        a.play();
+  function render(ms) {
+    const { ex, tilt, arms } = sketchPose(ms);
+    const fit = 1 - (1 - PR.fit) * (arms.reduce((s, m) => s + m, 0) / 4);
+    const ay = (-30 * tilt * Math.PI) / 180, ax = (20 * tilt * Math.PI) / 180;
+    const [cy, sy, cxr, sxr] = [Math.cos(ay), Math.sin(ay), Math.cos(ax), Math.sin(ax)];
+    const drawn = parts.map((p, i) => {
+      const m = arms[i];
+      const phi = Math.PI * (1 + m); // 180° — X, 360° — рама
+      const [c, s] = [Math.cos(phi), Math.sin(phi)];
+      // разлёт: от центра знака наружу, в X — вдоль диагонали, в раме — поперёк стороны
+      const dx = (1 - m) * p.side * SHIFT;
+      const mid = p.quad.reduce((a, v) => [a[0] + v[0] / 4, a[1] + v[1] / 4], [0, 0]);
+      const up = Math.sign(mid[1] - 50);
+      const fx = mid[0] - 50, fy = mid[1] - 50, fl = Math.hypot(fx, fy);
+      const dirX = mix(-p.side * Math.SQRT1_2, fx / fl, m), dirY = mix(up * Math.SQRT1_2, fy / fl, m), len = Math.hypot(dirX, dirY) || 1;
+      const e = ex * mix(PR.ex, PR.ef, m);
+      const tx = dx + (e * dirX) / len, ty = (e * dirY) / len;
+      const P = ([x, y, z]) => {
+        // поворот профиля вокруг своей вертикальной оси, разлёт, масштаб рамы
+        let X = p.cx + (x - p.cx) * c + z * s + tx, Y = y + ty, Z = -(x - p.cx) * s + z * c;
+        X = 50 + (X - 50) * fit; Y = 50 + (Y - 50) * fit; Z *= fit;
+        // разворот всего знака в перспективе (вокруг Y, потом X), проекция ортогональная
+        const X1 = 50 + (X - 50) * cy + Z * sy, Z1 = -(X - 50) * sy + Z * cy;
+        return [X1, 50 + (Y - 50) * cxr - Z1 * sxr, (Y - 50) * sxr + Z1 * cxr];
+      };
+      const top = p.quad.map(([x, y]) => P([x, y, H]));
+      const bot = p.quad.map(([x, y]) => P([x, y, -H]));
+      const centre = [...top, ...bot].reduce((a, v) => a.map((k, j) => k + v[j] / 8), [0, 0, 0]);
+      const polys = [top, [...bot].reverse(), ...[0, 1, 2, 3].map((k) => [top[k], bot[k], bot[(k + 1) % 4], top[(k + 1) % 4]])];
+      polys.forEach((poly, f) => {
+        const el = p.faces[f];
+        // нормаль грани, направленная наружу; грань видна, если смотрит на зрителя (+Z)
+        const [a, b, q] = [poly[0], poly[1], poly[2]];
+        let n = [(b[1] - a[1]) * (q[2] - a[2]) - (b[2] - a[2]) * (q[1] - a[1]), (b[2] - a[2]) * (q[0] - a[0]) - (b[0] - a[0]) * (q[2] - a[2]), (b[0] - a[0]) * (q[1] - a[1]) - (b[1] - a[1]) * (q[0] - a[0])];
+        const fc = poly.reduce((acc, v) => acc.map((k, j) => k + v[j] / poly.length), [0, 0, 0]);
+        const nl = Math.hypot(...n) || 1;
+        n = n.map((k) => k / nl);
+        if (n[0] * (fc[0] - centre[0]) + n[1] * (fc[1] - centre[1]) + n[2] * (fc[2] - centre[2]) < 0) n = n.map((k) => -k);
+        if (n[2] < 0.02) return el.setAttribute("d", "");
+        let d = `M${poly.map((v) => `${v[0].toFixed(2)} ${v[1].toFixed(2)}`).join("L")}Z`;
+        if (f === 0) {
+          // лицевая сторона рамы: сквозные отверстия (вырез по правилу evenodd)
+          d += p.holes.map(([hx, hy]) => `M${Array.from({ length: 20 }, (_, k) => {
+            const t = (k / 20) * 2 * Math.PI, r = PR.w * 0.17;
+            const v = P([hx + r * Math.cos(t), hy + r * Math.sin(t), H]);
+            return `${v[0].toFixed(2)} ${v[1].toFixed(2)}`;
+          }).join("L")}Z`).join("");
+        }
+        // светотень: грань к зрителю — чистый цвет знака, боковые и нижние темнее
+        const dark = Math.min(Math.max(0.55 * (1 - n[2]) + 0.16 * n[1] + 0.06 * n[0], 0), 0.7);
+        const fill = dark < 0.005 ? "currentColor" : `color-mix(in srgb, currentColor ${(100 - dark * 100).toFixed(1)}%, #000)`;
+        el.setAttribute("d", d);
+        // обводка тем же цветом закрывает волосяные просветы на стыках граней
+        el.setAttribute("style", `fill:${fill};fill-rule:evenodd;stroke:${fill};stroke-width:0.35;stroke-linejoin:round`);
       });
-      return Promise.all(animations.map((a) => a.finished)).catch(() => {});
+      return { g: p.g, z: centre[2] };
+    });
+    drawn.sort((a, b) => a.z - b.z).forEach(({ g }) => svg.append(g)); // дальние раньше, ближние поверх
+  }
+
+  render(0);
+  let raf = 0;
+  return {
+    frameAt: 1180 / SKETCH_T, // собранная рама в перспективе
+    seek(p) {
+      cancelAnimationFrame(raf);
+      render(Math.min(Math.max(p, 0), 1) * SKETCH_T);
+    },
+    play() {
+      cancelAnimationFrame(raf);
+      return new Promise((resolve) => {
+        const start = performance.now();
+        const step = (now) => {
+          const ms = Math.min(now - start, SKETCH_T);
+          render(ms);
+          ms < SKETCH_T ? (raf = requestAnimationFrame(step)) : resolve();
+        };
+        raf = requestAnimationFrame(step);
+      });
     },
   };
 }
@@ -182,9 +222,7 @@ function sketchController(svg) {
 // Знаки, которые двигаются: заставка, первый экран, лента бренда, витрина на странице выбора
 document.querySelectorAll("[data-mark], [data-scroll-mark], [data-hero-mark], [data-mark-demo] svg").forEach((svg) => {
   const variant = svg.dataset.variant || pageLogo;
-  const useSketch = variant === "sketch" && "animate" in Element.prototype;
-  const ctl = useSketch ? sketchController(svg) : svgController(svg);
-  (ctl.box || svg).mark = ctl;
+  svg.mark = variant === "sketch" ? sketchController(svg) : svgController(svg);
 });
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
