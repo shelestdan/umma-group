@@ -143,6 +143,7 @@ p { text-wrap: pretty; }
 .hero-lead { max-width: 34ch; font-size: clamp(17px, 1.5vw, 21px); color: var(--muted); }
 .hero-mark {
   --hole: var(--accent);
+  --mark-shade: #2c0b78;
   position: relative; display: grid; place-items: center; aspect-ratio: 1;
   background: var(--accent); color: #fff;
 }
@@ -150,6 +151,21 @@ p { text-wrap: pretty; }
   content: ""; position: absolute; right: 0; bottom: 0; width: 22%; aspect-ratio: 1; background: var(--pop);
 }
 .hero-mark .mark { width: 54%; height: 54%; }
+/* Фон первого экрана — два варианта на выбор.
+   1 (по умолчанию): тёплый тон и сетка, как клетчатый листок с эскизом знака.
+   2 (?bg=2): сиреневый фон и коралловая плитка со знаком. */
+.hero { position: relative; isolation: isolate; background: #efe9e0; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(rgba(22, 23, 27, 0.075) 1px, transparent 1px), linear-gradient(90deg, rgba(22, 23, 27, 0.075) 1px, transparent 1px);
+  background-size: 56px 56px; background-position: right -1px top -1px;
+  -webkit-mask-image: radial-gradient(110% 95% at 90% 45%, #000 35%, transparent 80%);
+  mask-image: radial-gradient(110% 95% at 90% 45%, #000 35%, transparent 80%);
+}
+[data-bg="2"] .hero { background: #ebe4f8; }
+[data-bg="2"] .hero::before { content: none; }
+[data-bg="2"] .hero-mark { --hole: var(--pop); --mark-shade: #a3240a; background: var(--pop); }
+[data-bg="2"] .hero-mark::after { background: var(--accent); }
 
 /* О нас */
 .about { padding-block: var(--section); display: grid; gap: clamp(56px, 7vw, 104px); }

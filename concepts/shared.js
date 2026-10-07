@@ -87,9 +87,10 @@ function svgController(svg) {
 /* --- Объёмный вариант по эскизу: маленький 3D-рендер в SVG ---
    Четыре настоящих профиля рамы (ширина, глубина, торцы «на ус»). На каждом кадре вершины
    поворачиваются и проецируются, невидимые грани отбрасываются, ближние профили рисуются поверх дальних.
-   Получается чистый вектор без «бумажных» рёбер, одинаковый во всех браузерах; отверстия вырезаны из грани. */
+   Получается чистый вектор без «бумажных» рёбер, одинаковый во всех браузерах.
+   Отверстия — на наружном ребре профиля, как на эскизе и у настоящих рам: их видно, когда рама ложится горизонтально. */
 const SKETCH_T = 2200; // полный цикл X → рама → X, мс
-const PR = { w: 15, d: 10, rx: 50, ry: 48, ex: 16, ef: 7, fit: 0.94 }; // ширина и глубина профиля, полуоси ромба, разлёт X и рамы, масштаб рамы
+const PR = { w: 15, d: 12, rx: 50, ry: 48, ex: 16, ef: 7, fit: 0.94 }; // ширина и глубина профиля, полуоси ромба, разлёт X и рамы, масштаб рамы
 const RH = Math.hypot(PR.rx, PR.ry);
 const RX_IN = PR.rx - (PR.w * RH) / PR.ry; // внутренний ромб: толщина по горизонтали w/sinθ
 const RY_IN = PR.ry - (PR.w * RH) / PR.rx; // и по вертикали w/cosθ
@@ -108,38 +109,41 @@ const easeIO = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - (
 // значение на отрезке времени [a, b]: от 0 до 1 с плавным разгоном и торможением
 const span = (ms, a, b) => easeIO((ms - a) / (b - a));
 
-// Раскадровка (мс): 0–200 X разбирается; 200–850 профили по очереди переворачиваются в раму;
-// 820–1020 рама собирается; 860–1120 разворот в перспективе; 1380 обратно: разбор, переворот, X.
+// Раскадровка (мс): 0–200 X разбирается и замирает; 260–910 профили по очереди переворачиваются в раму;
+// 880–1080 рама собирается; 900–1200 ложится горизонтально, видны рёбра с отверстиями; 1400 обратно: разбор, переворот, X.
 function sketchPose(ms) {
-  const flipIn = (i) => span(ms, 200 + i * 70, 640 + i * 70);
-  const flipOut = (i) => span(ms, 1500 + i * 70, 1900 + i * 70);
-  const ex = span(ms, 0, 200) - span(ms, 820, 1020) + span(ms, 1380, 1560) - span(ms, 2000, 2200);
-  const tilt = span(ms, 860, 1120) - span(ms, 1380, 1600);
+  const flipIn = (i) => span(ms, 260 + i * 70, 700 + i * 70);
+  const flipOut = (i) => span(ms, 1520 + i * 70, 1900 + i * 70);
+  const ex = span(ms, 0, 200) - span(ms, 880, 1080) + span(ms, 1400, 1580) - span(ms, 2000, 2200);
+  const tilt = span(ms, 900, 1200) - span(ms, 1400, 1640);
   return { ex, tilt, arms: PROFILES.map((_, i) => flipIn(i) - flipOut(i)) }; // 0 — X, 1 — рама
 }
 
 function sketchController(svg) {
   svg.textContent = "";
   svg.style.overflow = "visible";
+  // отверстия по наружному ребру: центры на середине толщины, окружность в плоскости ребра
   const holes = (p) => {
-    const [[a1, a2], [b1, b2]] = p.ends;
-    const m1 = [(a1[0] + a2[0]) / 2, (a1[1] + a2[1]) / 2];
-    const m2 = [(b1[0] + b2[0]) / 2, (b1[1] + b2[1]) / 2];
-    return [0.27, 0.5, 0.73].map((f) => [mix(m1[0], m2[0], f), mix(m1[1], m2[1], f)]);
+    const [a, b] = p.quad;
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const u = [(b[0] - a[0]) / len, (b[1] - a[1]) / len];
+    return [0.25, 0.5, 0.75].map((f) => ({ c: [mix(a[0], b[0], f), mix(a[1], b[1], f)], u }));
   };
   const parts = PROFILES.map((p) => {
     const g = document.createElementNS(SVG_NS, "g");
     const faces = Array.from({ length: 6 }, () => g.appendChild(document.createElementNS(SVG_NS, "path")));
+    const holePath = g.appendChild(document.createElementNS(SVG_NS, "path"));
+    holePath.setAttribute("style", "fill:var(--hole, #fff);stroke:none");
     svg.append(g);
     const xs = p.quad.map((v) => v[0]);
-    return { ...p, g, faces, cx: (Math.min(...xs) + Math.max(...xs)) / 2, holes: holes(p) };
+    return { ...p, g, faces, holePath, cx: (Math.min(...xs) + Math.max(...xs)) / 2, holes: holes(p) };
   });
   const H = PR.d / 2;
 
   function render(ms) {
     const { ex, tilt, arms } = sketchPose(ms);
-    const fit = 1 - (1 - PR.fit) * (arms.reduce((s, m) => s + m, 0) / 4);
-    const ay = (-30 * tilt * Math.PI) / 180, ax = (20 * tilt * Math.PI) / 180;
+    const fit = (1 - (1 - PR.fit) * (arms.reduce((s, m) => s + m, 0) / 4)) * (1 + 0.15 * tilt); // лежащая рама ниже — чуть крупнее
+    const ay = (-10 * tilt * Math.PI) / 180, ax = (56 * tilt * Math.PI) / 180; // рама ложится горизонтально
     const [cy, sy, cxr, sxr] = [Math.cos(ay), Math.sin(ay), Math.cos(ax), Math.sin(ax)];
     const drawn = parts.map((p, i) => {
       const m = arms[i];
@@ -174,22 +178,24 @@ function sketchController(svg) {
         const nl = Math.hypot(...n) || 1;
         n = n.map((k) => k / nl);
         if (n[0] * (fc[0] - centre[0]) + n[1] * (fc[1] - centre[1]) + n[2] * (fc[2] - centre[2]) < 0) n = n.map((k) => -k);
+        if (f === 2) p.holePath.setAttribute("d", "");
         if (n[2] < 0.02) return el.setAttribute("d", "");
-        let d = `M${poly.map((v) => `${v[0].toFixed(2)} ${v[1].toFixed(2)}`).join("L")}Z`;
-        if (f === 0) {
-          // лицевая сторона рамы: сквозные отверстия (вырез по правилу evenodd)
-          d += p.holes.map(([hx, hy]) => `M${Array.from({ length: 20 }, (_, k) => {
-            const t = (k / 20) * 2 * Math.PI, r = PR.w * 0.17;
-            const v = P([hx + r * Math.cos(t), hy + r * Math.sin(t), H]);
+        const d = `M${poly.map((v) => `${v[0].toFixed(2)} ${v[1].toFixed(2)}`).join("L")}Z`;
+        if (f === 2) {
+          // наружное ребро: отверстия цветом фона (--hole) поверх грани; сквозь сплошной профиль ничего не видно
+          p.holePath.setAttribute("d", p.holes.map(({ c: [hx, hy], u }) => `M${Array.from({ length: 20 }, (_, k) => {
+            const t = (k / 20) * 2 * Math.PI, r = PR.d * 0.27;
+            const v = P([hx + r * Math.cos(t) * u[0], hy + r * Math.cos(t) * u[1], r * Math.sin(t)]);
             return `${v[0].toFixed(2)} ${v[1].toFixed(2)}`;
-          }).join("L")}Z`).join("");
+          }).join("L")}Z`).join(""));
         }
-        // светотень: грань к зрителю — чистый цвет знака, боковые и нижние темнее
-        const dark = Math.min(Math.max(0.55 * (1 - n[2]) + 0.16 * n[1] + 0.06 * n[0], 0), 0.7);
-        const fill = dark < 0.005 ? "currentColor" : `color-mix(in srgb, currentColor ${(100 - dark * 100).toFixed(1)}%, #000)`;
+        // светотень: свет сверху и от зрителя. Грань к зрителю и верх — чистый цвет знака, бока и низ темнее.
+        // Тень смешивается с --mark-shade (тон фона), а не с чёрным: белый знак не даёт серых полос.
+        const dark = Math.min(Math.max((0.5 * (0.8 - (-0.6 * n[1] + 0.8 * n[2]))) / 0.8, 0), 0.7);
+        const fill = dark < 0.005 ? "currentColor" : `color-mix(in srgb, currentColor ${(100 - dark * 100).toFixed(1)}%, var(--mark-shade, #000))`;
         el.setAttribute("d", d);
         // обводка тем же цветом закрывает волосяные просветы на стыках граней
-        el.setAttribute("style", `fill:${fill};fill-rule:evenodd;stroke:${fill};stroke-width:0.35;stroke-linejoin:round`);
+        el.setAttribute("style", `fill:${fill};stroke:${fill};stroke-width:0.35;stroke-linejoin:round`);
       });
       return { g: p.g, z: centre[2] };
     });
@@ -199,7 +205,7 @@ function sketchController(svg) {
   render(0);
   let raf = 0;
   return {
-    frameAt: 1180 / SKETCH_T, // собранная рама в перспективе
+    frameAt: 1240 / SKETCH_T, // рама собрана и лежит горизонтально
     seek(p) {
       cancelAnimationFrame(raf);
       render(Math.min(Math.max(p, 0), 1) * SKETCH_T);

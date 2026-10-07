@@ -12,7 +12,9 @@
         var d = document.documentElement;
         d.classList.add("js");
         try {
-          var force = new URLSearchParams(location.search).has("intro");
+          var params = new URLSearchParams(location.search);
+          var force = params.has("intro");
+          if (params.get("bg") === "2") d.dataset.bg = "2"; // второй вариант фона первого экрана
           var seen = sessionStorage.getItem("framex-intro-seen");
           if (!matchMedia("(prefers-reduced-motion: reduce)").matches && (force || !seen)) d.classList.add("intro-on");
         } catch (e) {}
