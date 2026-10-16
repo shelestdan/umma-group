@@ -16,8 +16,9 @@
 }
 
 :root {
-  --paper: #f4f2ee;
-  --plate: #e6e3dd;
+  --paper: #ebe5da;
+  --plate: #dcd4c6;
+  --violet-dark: #2a0b6f;
   --ink: #16171b;
   --muted: #505158;
   --line: rgba(22, 23, 27, 0.16);
@@ -154,7 +155,7 @@ p { text-wrap: pretty; }
 /* Фон первого экрана — два варианта на выбор.
    1 (по умолчанию): тёплый тон и сетка, как клетчатый листок с эскизом знака.
    2 (?bg=2): сиреневый фон и коралловая плитка со знаком. */
-.hero { position: relative; isolation: isolate; background: #efe9e0; }
+.hero { position: relative; isolation: isolate; background: #e4dccd; }
 .hero::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background-image: linear-gradient(rgba(22, 23, 27, 0.075) 1px, transparent 1px), linear-gradient(90deg, rgba(22, 23, 27, 0.075) 1px, transparent 1px);
@@ -177,7 +178,7 @@ p { text-wrap: pretty; }
 .about-photo img { width: 100%; height: 100%; object-fit: cover; }
 .about-text { display: grid; gap: 24px; font-size: clamp(17px, 1.4vw, 20px); color: var(--muted); max-width: 46ch; }
 .manifesto {
-  padding-top: clamp(32px, 4vw, 52px); border-top: 2px solid var(--ink);
+  padding-top: clamp(40px, 4.4vw, 64px); background: var(--rail) top left / 100% 14px no-repeat;
   font-size: clamp(40px, 7.3vw, 116px); line-height: 1; font-weight: 700; letter-spacing: -0.05em;
 }
 
@@ -196,6 +197,9 @@ p { text-wrap: pretty; }
 }
 .svc h3 { font-size: clamp(22px, 2.1vw, 32px); line-height: 1.08; letter-spacing: -0.025em; transition: transform 0.55s var(--ease); }
 .svc p { color: var(--on-dark); }
+.services-list { counter-reset: svc; }
+.svc h3::before { counter-increment: svc; content: "0" counter(svc); display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; color: var(--pop); }
+@media (hover: hover) { .svc:hover h3::before { color: var(--ink); } }
 .svc p { transition: color 0.4s; }
 @media (hover: hover) {
   .svc:hover::before { transform: none; }
@@ -249,8 +253,13 @@ p { text-wrap: pretty; }
 .cta-inner { display: grid; gap: clamp(64px, 10vw, 160px); padding-block: clamp(56px, 6vw, 88px); }
 .cta-note { font-size: clamp(17px, 1.4vw, 20px); max-width: 36ch; }
 .cta-big { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; font-size: clamp(52px, 10vw, 164px); line-height: 0.86; font-weight: 700; letter-spacing: -0.06em; }
-.cta-arrow { flex: none; transition: transform 0.6s var(--ease); }
-.cta-band:hover .cta-arrow { transform: translateX(12px); }
+/* Вместо стрелки — плитка со знаком: при наведении X поворачивается и плитка уезжает вправо */
+.cta-tile { flex: none; display: grid; place-items: center; width: 0.82em; aspect-ratio: 1; background: var(--accent); color: #fff; transition: transform 0.6s var(--ease); }
+.cta-tile .mark { width: 0.5em; height: 0.5em; transition: transform 0.7s var(--ease); }
+.cta-tile .mark path { stroke-width: 16; }
+.cta-band:hover .cta-tile { transform: translateX(10px); }
+.cta-band:hover .cta-tile .mark { transform: rotate(90deg); }
+.cta-band { background: var(--rail-c) top left / 100% 14px no-repeat, var(--rail-c) bottom left / 100% 14px no-repeat, var(--pop); }
 .cta-band:focus-visible { outline-offset: -6px; outline-color: var(--ink); }
 
 /* Вопросы */
@@ -258,7 +267,7 @@ p { text-wrap: pretty; }
 .faq { background: #ece7f8; box-shadow: 0 0 0 100vmax #ece7f8; clip-path: inset(0 -100vmax); }
 .faq { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 64px; padding-block: var(--section); }
 .faq h2 { font-size: clamp(36px, 4vw, 60px); }
-.faq-list { border-top: 2px solid var(--ink); }
+.faq-list { padding-top: 14px; background: var(--rail) top left / 100% 14px no-repeat; }
 details { border-bottom: 1px solid var(--line); }
 summary {
   display: flex; justify-content: space-between; align-items: center; gap: 24px;
@@ -267,12 +276,17 @@ summary {
 }
 summary:hover { color: var(--accent); }
 summary::-webkit-details-marker { display: none; }
+/* Кнопка вопроса — маленькая рама с «+»: при наведении поворачивается ромбом и «+» становится X, открытая — заливается */
 summary::after {
-  content: "+"; flex: none; display: grid; place-items: center; width: 40px; height: 40px;
-  border: 1px solid var(--line); border-radius: 50%; font-weight: 400; font-size: 20px; color: var(--ink);
-  transition: transform 0.45s var(--ease), background-color 0.3s, color 0.3s;
+  content: ""; flex: none; width: 44px; height: 44px; box-sizing: border-box;
+  border: 3px solid var(--accent); color: var(--accent);
+  background:
+    linear-gradient(currentColor, currentColor) center / 16px 3px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 3px 16px no-repeat;
+  transition: transform 0.55s var(--ease), background-color 0.3s, color 0.3s, border-color 0.3s;
 }
-details[open] summary::after { transform: rotate(135deg); background: var(--accent); border-color: var(--accent); color: #fff; }
+summary:hover::after { transform: rotate(45deg) scale(0.74); }
+details[open] summary::after { transform: rotate(45deg) scale(0.74); background-color: var(--accent); color: #fff; }
 details p { overflow: hidden; padding: 0 64px 28px 0; color: var(--muted); max-width: 62ch; }
 
 /* Форма */
@@ -298,7 +312,7 @@ details p { overflow: hidden; padding: 0 64px 28px 0; color: var(--muted); max-w
 .upload-control small { display: block; font-size: 14px; color: var(--on-dark); }
 .upload input:focus-visible + .upload-control { outline: 3px solid #fff; outline-offset: 3px; }
 .upload-list:not(:empty) { margin-top: 10px; font-size: 14px; color: var(--on-dark); }
-.contact { background: var(--graphite); color: #f4f2ee; padding-block: var(--section); }
+.contact { background: var(--violet-dark); color: #f4f2ee; padding-block: var(--section); --on-dark: #c8bdf0; --field-line: rgba(255, 255, 255, 0.45); }
 .contact-inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px 64px; }
 .contact-head h2 { font-size: clamp(42px, 5.4vw, 84px); letter-spacing: -0.05em; max-width: 9ch; }
 .contact-head p { margin-top: 24px; color: var(--on-dark); max-width: 36ch; }
@@ -479,7 +493,7 @@ details p { overflow: hidden; padding: 0 64px 28px 0; color: var(--muted); max-w
 .project:last-of-type { padding-bottom: var(--section); }
 .project-head {
   display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 40px;
-  padding-bottom: 20px; margin-bottom: clamp(20px, 2.6vw, 36px); border-bottom: 2px solid var(--ink);
+  padding-bottom: 34px; margin-bottom: clamp(20px, 2.6vw, 36px); background: var(--rail) bottom left / 100% 14px no-repeat;
 }
 .project-head h2 { font-size: clamp(40px, 6.4vw, 104px); letter-spacing: -0.05em; }
 .project-meta { display: flex; flex-wrap: wrap; gap: 4px 24px; padding-bottom: 0.4em; color: var(--muted); font-size: 17px; }
@@ -543,3 +557,93 @@ details p { overflow: hidden; padding: 0 64px 28px 0; color: var(--muted); max-w
 .works-page .header { color: #fff; }
 .works-page .header.is-scrolled, .menu-open .works-page .header { color: var(--ink); }
 
+
+/* ---------- Свой язык: профиль с отверстиями, мессенджеры, контакты ---------- */
+/* профиль рамы: фиолетовая полоса с круглыми отверстиями цвета фона (считается на месте — берёт фон своего блока) */
+.manifesto, .faq-list, .contacts-item, .cta-band, .project-head {
+  --rail: radial-gradient(circle, var(--paper) 0 3px, transparent 3.5px) 7px 0 / 28px 14px repeat-x, linear-gradient(var(--accent), var(--accent));
+  --rail-c: radial-gradient(circle, var(--pop) 0 3px, transparent 3.5px) 7px 0 / 28px 14px repeat-x, linear-gradient(var(--accent), var(--accent));
+}
+.faq { --paper: #ece7f8; }
+
+/* Работы: несколько фото у проекта, миниатюры переключают главное фото */
+.work-thumbs { display: flex; gap: 8px; margin-top: -6px; }
+.work-thumb {
+  position: relative; flex: none; width: clamp(48px, 4.6vw, 64px); aspect-ratio: 1; padding: 0; border: 0; overflow: hidden;
+  background: var(--plate); cursor: pointer; opacity: 0.62; transition: opacity 0.3s;
+}
+.work-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.work-thumb::after { content: ""; position: absolute; inset: 0; border: 3px solid var(--accent); opacity: 0; transition: opacity 0.3s; }
+.work-thumb:hover { opacity: 1; }
+.work-thumb[aria-pressed="true"] { opacity: 1; }
+.work-thumb[aria-pressed="true"]::after { opacity: 1; }
+[data-work-main] { transition: opacity 0.35s var(--ease), transform 1.2s var(--ease); }
+[data-work-main].is-swapping { opacity: 0; }
+
+/* Контакты */
+.contacts { padding-block: var(--section); display: grid; gap: clamp(32px, 4vw, 56px); }
+.contacts h2 { font-size: clamp(56px, 9vw, 144px); line-height: 0.86; letter-spacing: -0.06em; }
+.contacts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 4vw, 64px); }
+.contacts-item { display: grid; gap: 8px; align-content: start; padding: 28px 0 32px; background: var(--rail) top left / 100% 14px no-repeat; padding-top: 40px; }
+.contacts-label { font-size: 15px; color: var(--muted); }
+.contacts-big { font-size: clamp(28px, 3.3vw, 52px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; text-decoration: none; transition: color 0.3s; }
+a.contacts-big:hover { color: var(--accent); }
+.contacts-big--muted { font-size: clamp(20px, 1.8vw, 28px); font-weight: 600; color: var(--muted); letter-spacing: -0.02em; }
+.contacts-item small { font-size: 14px; color: var(--muted); }
+.contacts-msg { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.msg {
+  display: inline-flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 22px 0 14px;
+  color: #fff; font-weight: 700; font-size: 18px; text-decoration: none; transition: transform 0.45s var(--ease), background-color 0.3s;
+}
+.msg svg { width: 32px; height: 32px; fill: currentColor; transition: transform 0.6s var(--ease); }
+.msg--tg { background: var(--accent); }
+.msg--max { background: var(--pop); color: var(--ink); }
+.msg:hover { transform: translateY(-3px); }
+.msg:hover svg { transform: rotate(-12deg) scale(1.08); }
+
+/* Плавающие мессенджеры: кусок профиля рамы с двумя кнопками, подпись выезжает при наведении */
+.dock {
+  position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 40;
+  display: grid; padding-top: 14px; width: 60px;
+  background: radial-gradient(circle, var(--paper) 0 2.5px, transparent 3px) 0 1px / 12px 12px repeat-x, var(--violet-dark);
+  box-shadow: 0 10px 30px rgba(42, 11, 111, 0.28);
+  transition: transform 0.5s var(--ease), opacity 0.4s;
+}
+.dock-btn {
+  position: relative; display: grid; place-items: center; width: 60px; height: 58px; color: #fff; text-decoration: none;
+}
+.dock-btn svg { position: relative; z-index: 1; width: 30px; height: 30px; fill: currentColor; transition: transform 0.55s var(--ease); }
+.dock-btn--max { color: var(--pop); }
+.dock-btn::before { content: ""; position: absolute; inset: 6px; background: currentColor; opacity: 0; transform: rotate(45deg) scale(0.4); transition: opacity 0.3s, transform 0.5s var(--ease); }
+.dock-btn:hover::before, .dock-btn:focus-visible::before { opacity: 0.16; transform: rotate(45deg) scale(0.9); }
+.dock-btn:hover svg { transform: scale(1.1) rotate(-10deg); }
+.dock-label {
+  position: absolute; right: calc(100% + 10px); top: 50%; translate: 0 -50%;
+  padding: 8px 14px; background: var(--ink); color: #fff; font-weight: 600; font-size: 15px; white-space: nowrap;
+  opacity: 0; transform: translateX(8px); pointer-events: none; transition: opacity 0.3s, transform 0.45s var(--ease);
+}
+.dock-btn:hover .dock-label, .dock-btn:focus-visible .dock-label { opacity: 1; transform: none; }
+.dock :focus-visible { outline-color: #fff; outline-offset: -4px; }
+.dock-btn + .dock-btn { border-top: 2px solid rgba(255, 255, 255, 0.14); }
+.intro-on .dock { opacity: 0; pointer-events: none; }
+.menu-open .dock { opacity: 0; pointer-events: none; }
+
+.menu-phones, .footer-phones { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.menu-phones a { font-size: 18px; font-weight: 700; color: var(--ink); text-decoration: none; }
+.footer-phones a { color: #fff; font-weight: 600; text-decoration: none; }
+.footer-phones a:hover, .menu-phones a:hover { color: var(--pop); }
+
+/* Третий вариант фона первого экрана: фото стенда, слева светлая растяжка под заголовок */
+[data-bg="3"] .hero { background: #e4dccd; }
+[data-bg="3"] .hero::before {
+  -webkit-mask-image: none; mask-image: none;
+  background: linear-gradient(90deg, #e4dccd 0 34%, rgba(228, 220, 205, 0.82) 52%, rgba(228, 220, 205, 0.25) 78%), url("../../assets/works/maer-vef-03.webp") right center / cover no-repeat;
+}
+
+@media (max-width: 640px) {
+  .contacts-grid { grid-template-columns: minmax(0, 1fr); }
+  .dock { width: 52px; right: 12px; bottom: 12px; }
+  .dock-btn { width: 52px; height: 50px; }
+  .dock-btn svg { width: 26px; height: 26px; }
+  [data-bg="3"] .hero::before { background: linear-gradient(180deg, rgba(228, 220, 205, 0.55), #e4dccd 78%), url("../../assets/works/maer-vef-03.webp") center top / cover no-repeat; }
+}

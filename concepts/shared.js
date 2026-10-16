@@ -106,7 +106,7 @@ const PROFILES = [["L", "T"], ["T", "R"], ["L", "B"], ["B", "R"]].map(([a, b], i
   ends: [[OUT[a], IN[a]], [OUT[b], IN[b]]],
   side: i % 2 ? -1 : 1, // левые профили (составляют «>») и правые («<»)
 }));
-const VIEW = { ax: -18, ay: -38, az: -22 }; // ракурс рамы как на эскизе 3: видны верхнее и правое рёбра с отверстиями
+const VIEW = { ax: 56, ay: -10, az: 0 }; // ракурс рамы: ложится, раскрываясь снизу (по просьбе клиентки, как было раньше)
 const easeIO = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 // значение на отрезке времени [a, b]: от 0 до 1 с плавным разгоном и торможением
 const span = (ms, a, b) => easeIO((ms - a) / (b - a));
@@ -144,7 +144,7 @@ function sketchController(svg) {
 
   function render(ms) {
     const { ex, tilt, arms } = sketchPose(ms);
-    const fit = (1 - (1 - PR.fit) * (arms.reduce((s, m) => s + m, 0) / 4)) * (1 + 0.2 * tilt); // развёрнутая рама уже — чуть крупнее
+    const fit = (1 - (1 - PR.fit) * (arms.reduce((s, m) => s + m, 0) / 4)) * (1 + 0.15 * tilt); // лежащая рама ниже — чуть крупнее
     const ay = (VIEW.ay * tilt * Math.PI) / 180, ax = (VIEW.ax * tilt * Math.PI) / 180;
     const az = (VIEW.az * tilt * Math.PI) / 180;
     const [cy, sy, cxr, sxr, cz, sz] = [Math.cos(ay), Math.sin(ay), Math.cos(ax), Math.sin(ax), Math.cos(az), Math.sin(az)];
@@ -565,3 +565,21 @@ else {
   intro?.remove();
   afterIntro();
 }
+
+// Работы: у проекта несколько фото, миниатюры переключают главное
+document.querySelectorAll("[data-work]").forEach((work) => {
+  const main = work.querySelector("[data-work-main]");
+  const thumbs = work.querySelectorAll(".work-thumb");
+  thumbs.forEach((btn) =>
+    btn.addEventListener("click", () => {
+      if (btn.getAttribute("aria-pressed") === "true") return;
+      thumbs.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      main.classList.add("is-swapping");
+      setTimeout(() => {
+        main.src = btn.dataset.src;
+        main.alt = btn.dataset.alt;
+        main.classList.remove("is-swapping");
+      }, reduceMotion ? 0 : 250);
+    })
+  );
+});
