@@ -458,21 +458,45 @@ header?.addEventListener("focusin", () => header.classList.remove("is-hidden"));
 if (frameHero && !reduceMotion) frameHero.classList.add("is-scrubbed");
 onScroll();
 
-/* Вопросы раскрываются плавно */
+/* Вопросы раскрываются и закрываются плавно: анимируем высоту вместе с отступами ответа,
+   чтобы после закрытия не было второго скачка; значок меняется сразу по нажатию */
 document.querySelectorAll("details").forEach((item) => {
   const summary = item.querySelector("summary");
   const body = summary.nextElementSibling;
+  item.classList.toggle("is-open", item.open);
+  item.addEventListener("toggle", () => !item.matches(".is-closing") && item.classList.toggle("is-open", item.open));
+  let anim = null;
   summary.addEventListener("click", (e) => {
     if (reduceMotion || !body?.animate) return;
     e.preventDefault();
     const timing = { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" };
-    if (item.open) {
+    const shut = { height: "0px", paddingTop: "0px", paddingBottom: "0px", opacity: 0 };
+    const measure = () => {
+      const cs = getComputedStyle(body);
+      return { height: `${body.offsetHeight}px`, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom, opacity: 1 };
+    };
+    const closing = item.open && !item.classList.contains("is-closing");
+    // если анимация ещё идёт, продолжаем от текущей высоты, без рывка
+    const from = anim ? { height: `${body.getBoundingClientRect().height}px`, opacity: getComputedStyle(body).opacity } : null;
+    anim?.cancel();
+    if (closing) {
+      const start = from ? { ...measure(), ...from } : measure();
+      item.classList.add("is-closing");
       item.classList.remove("is-open");
-      body.animate([{ height: `${body.offsetHeight}px`, opacity: 1 }, { height: "0px", opacity: 0 }], timing).onfinish = () => (item.open = false);
+      anim = body.animate([start, shut], { ...timing, fill: "forwards" });
+      anim.onfinish = () => {
+        item.open = false;
+        item.classList.remove("is-closing");
+        anim.cancel();
+        anim = null;
+      };
     } else {
+      item.classList.remove("is-closing");
       item.open = true;
       item.classList.add("is-open");
-      body.animate([{ height: "0px", opacity: 0 }, { height: `${body.offsetHeight}px`, opacity: 1 }], timing);
+      const end = measure();
+      anim = body.animate([from ? { ...shut, ...from } : shut, end], timing);
+      anim.onfinish = () => (anim = null);
     }
   });
 });

@@ -275,15 +275,17 @@ p { text-wrap: pretty; }
 .showcase-links { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; margin-top: 6px; }
 
 /* ---------- Большая кнопка-блок ---------- */
-.cta-band { display: block; background: var(--pop); color: var(--ink); text-decoration: none; position: relative; isolation: isolate; overflow: hidden; }
-.cta-band::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; background: var(--pop-deep);
-  transform: translateY(101%); transition: transform 0.7s var(--ease);
+/* Заливка при наведении поднимается снизу фоном самого блока: без отдельного слоя под текстом,
+   иначе в Chrome плотно поставленные буквы обрезаются по краям */
+.cta-band {
+  display: block; position: relative; color: var(--ink); text-decoration: none;
+  background: linear-gradient(var(--pop-deep), var(--pop-deep)) left bottom / 100% 0% no-repeat, var(--pop);
+  transition: background-size 0.7s var(--ease);
 }
-.cta-band:hover::before { transform: none; }
+.cta-band:hover { background-size: 100% 100%, auto; }
 .cta-inner { display: grid; gap: clamp(56px, 8vw, 128px); padding-block: clamp(48px, 5.5vw, 80px); }
 .cta-note { font-size: clamp(17px, 1.4vw, 20px); max-width: 36ch; }
-.cta-big { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; font-size: clamp(48px, 9vw, 148px); line-height: 0.86; font-weight: 700; letter-spacing: -0.06em; }
+.cta-big { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; font-size: clamp(48px, 9vw, 148px); line-height: 0.86; font-weight: 700; letter-spacing: -0.045em; }
 /* Своё решение: вместо стрелки — плитка со знаком, при наведении X поворачивается */
 .cta-tile { flex: none; display: grid; place-items: center; width: 0.78em; aspect-ratio: 1; background: var(--accent); color: #fff; transition: transform 0.6s var(--ease); }
 .cta-tile .mark { width: 0.46em; height: 0.46em; transition: transform 0.7s var(--ease); }
@@ -312,7 +314,7 @@ summary::after {
   transition: background-size 0.4s var(--ease), color 0.3s, transform 0.5s var(--ease);
 }
 summary:hover::after { color: var(--accent); }
-details[open] summary::after { color: var(--accent); transform: rotate(180deg); background-size: 22px 2px, 2px 0; }
+details.is-open summary::after, html:not(.js) details[open] summary::after { color: var(--accent); transform: rotate(180deg); background-size: 22px 2px, 2px 0; }
 details p { overflow: hidden; padding: 0 56px 26px 0; color: var(--muted); max-width: 62ch; }
 
 /* ---------- Форма: компактная, на тёмно-фиолетовом ---------- */
