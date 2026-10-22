@@ -388,6 +388,7 @@ function startReveal() {
 /* Шапка: тень после начала прокрутки, прячется при прокрутке вниз и возвращается при прокрутке вверх */
 const header = document.querySelector(".header");
 let lastY = scrollY;
+let travel = 0; // накопленный путь в одном направлении: мелкие колебания не прячут и не показывают шапку
 let ticking = false;
 const parallax = document.querySelectorAll("[data-parallax]");
 const frameHero = document.querySelector("[data-frame-hero]");
@@ -400,10 +401,14 @@ const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
 function onScroll() {
   ticking = false;
   const y = scrollY;
-  if (header) {
+  if (header && !root.classList.contains("menu-open")) {
     header.classList.toggle("is-scrolled", y > 8);
-    if (!root.classList.contains("menu-open")) header.classList.toggle("is-hidden", y > lastY + 2 && y > 480);
-    if (y < lastY - 2) header.classList.remove("is-hidden");
+    const dy = y - lastY;
+    if (dy && Math.sign(dy) !== Math.sign(travel)) travel = 0;
+    travel += dy;
+    const pinned = y < header.offsetHeight * 2 || header.contains(document.activeElement);
+    if (pinned || travel < -12) header.classList.remove("is-hidden");
+    else if (travel > 24) header.classList.add("is-hidden");
   }
   lastY = y;
   if (reduceMotion) return;
@@ -472,25 +477,70 @@ document.querySelectorAll("details").forEach((item) => {
   });
 });
 
-/* Мобильное меню */
+/* Мобильное меню.
+   Открыто: остальная страница недоступна (inert) и не прокручивается, фокус остаётся в шапке.
+   Закрытие: Escape, кнопка, пункт меню или переход на широкий экран; фокус возвращается на кнопку.
+   С data-animated (концепт A) панель закрывается анимацией, без него — сразу (концепт B). */
 const menuButton = document.querySelector("[data-menu-toggle]");
 const menu = document.getElementById(menuButton?.getAttribute("aria-controls"));
-function setMenu(open) {
+let menuScrollY = 0;
+let menuTimer = 0;
+const menuOutside = () => [...document.querySelectorAll("body > *")].filter((el) => el !== header && el.tagName !== "SCRIPT" && el.tagName !== "DIALOG");
+function setMenu(open, { restoreFocus = false } = {}) {
+  if (!menuButton || !menu) return;
+  if (open === root.classList.contains("menu-open")) return;
+  clearTimeout(menuTimer);
   menuButton.setAttribute("aria-expanded", String(open));
   menuButton.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню");
-  menu.hidden = !open;
   root.classList.toggle("menu-open", open);
+  menuOutside().forEach((el) => (el.inert = open));
+  const body = document.body;
+  if (open) {
+    menuScrollY = scrollY;
+    header?.classList.remove("is-hidden");
+    // фиксируем страницу на месте, чтобы фон не прокручивался и на iOS
+    Object.assign(body.style, { position: "fixed", top: `-${menuScrollY}px`, left: "0", right: "0" });
+    menu.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => menu.classList.add("is-open")));
+  } else {
+    Object.assign(body.style, { position: "", top: "", left: "", right: "" });
+    scrollTo({ top: menuScrollY, behavior: "instant" });
+    menu.classList.remove("is-open");
+    const hide = () => (menu.hidden = true);
+    if (menu.hasAttribute("data-animated") && !reduceMotion) menuTimer = setTimeout(hide, 450);
+    else hide();
+    if (restoreFocus) menuButton.focus();
+  }
 }
 if (menuButton && menu) {
   menuButton.addEventListener("click", () => setMenu(menuButton.getAttribute("aria-expanded") !== "true"));
+  // Пункт меню: закрываем и даём ссылке перейти (якорь или другая страница)
   menu.addEventListener("click", (e) => e.target.closest("a") && setMenu(false));
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !menu.hidden) {
-      setMenu(false);
-      menuButton.focus();
-    }
+    if (e.key === "Escape" && root.classList.contains("menu-open")) setMenu(false, { restoreFocus: true });
   });
-  matchMedia("(min-width: 1024px)").addEventListener("change", (e) => e.matches && setMenu(false));
+  matchMedia("(min-width: 961px)").addEventListener("change", (e) => e.matches && setMenu(false));
+}
+
+/* Подсветка текущего раздела в навигации главной */
+const spyLinks = [...document.querySelectorAll(".nav a[data-spy]")];
+if (spyLinks.length && "IntersectionObserver" in window) {
+  const byId = new Map(spyLinks.map((a) => [a.hash.slice(1), a]));
+  const spy = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        spyLinks.forEach((a) => a.removeAttribute("aria-current"));
+        byId.get(entry.target.id)?.setAttribute("aria-current", "true");
+      }),
+    { rootMargin: "-45% 0px -50% 0px" }
+  );
+  byId.forEach((_, id) => {
+    const section = document.getElementById(id);
+    if (section) spy.observe(section);
+  });
+  // над первым разделом подсветки нет
+  addEventListener("scroll", () => scrollY < innerHeight * 0.5 && spyLinks.forEach((a) => a.removeAttribute("aria-current")), { passive: true });
 }
 
 /* Лента работ (концепт B) */
@@ -542,22 +592,154 @@ document.querySelectorAll("[data-mark-demo]").forEach((card) => {
   setTimeout(play, 700);
 });
 
-/* Выбор файлов в демо-форме: показываем имена, сами файлы никуда не уходят */
+/* Вложения в демо-форме: файлы можно добавлять несколькими заходами и убирать по одному.
+   Набор файлов в поле меняется на самом деле (DataTransfer); без его поддержки кнопки «убрать» не показываем. */
+const canEditFiles = (() => {
+  try {
+    return !!new DataTransfer().items;
+  } catch {
+    return false;
+  }
+})();
+const fileSize = (n) => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} КБ` : `${(n / 1024 / 1024).toFixed(1).replace(".", ",")} МБ`);
 document.querySelectorAll("[data-file-input]").forEach((input) => {
   const list = input.parentElement.querySelector("[data-file-list]");
+  const itemTag = list?.tagName === "UL" ? "li" : "span";
+  let picked = [];
+  const render = () => {
+    if (canEditFiles) {
+      const dt = new DataTransfer();
+      picked.forEach((f) => dt.items.add(f));
+      input.files = dt.files;
+    }
+    if (!list) return;
+    if (itemTag === "span") return (list.textContent = picked.map((f) => f.name).join(", "));
+    list.replaceChildren(
+      ...picked.map((f, i) => {
+        const li = document.createElement("li");
+        const name = document.createElement("span");
+        name.className = "file-name";
+        name.textContent = f.name;
+        name.title = f.name;
+        const size = document.createElement("span");
+        size.className = "file-size";
+        size.textContent = fileSize(f.size);
+        li.append(name, size);
+        if (canEditFiles) {
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "file-remove";
+          remove.dataset.remove = i;
+          remove.setAttribute("aria-label", `Убрать файл ${f.name}`);
+          remove.textContent = "×";
+          li.append(remove);
+        }
+        return li;
+      })
+    );
+  };
   input.addEventListener("change", () => {
-    list.textContent = [...input.files].map((f) => f.name).join(", ");
+    const fresh = [...input.files];
+    picked = canEditFiles ? [...picked, ...fresh.filter((f) => !picked.some((p) => p.name === f.name && p.size === f.size && p.lastModified === f.lastModified))] : fresh;
+    render();
+  });
+  list?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove]");
+    if (!btn) return;
+    picked.splice(+btn.dataset.remove, 1);
+    render();
+    (list.querySelector(".file-remove") || input.parentElement.querySelector("label"))?.focus();
   });
 });
 
-/* Демо-форма: честно сообщает, что ничего не отправляется */
-document.querySelectorAll("[data-demo-form]").forEach((form) =>
+/* Демо-форма: понятные ошибки полей; отправки нет, и форма честно об этом говорит */
+const formChecks = {
+  name: (el) => (el.value.trim() ? "" : "Укажите, как к вам обращаться"),
+  phone: (el) => ((el.value.match(/\d/g) || []).length >= 10 ? "" : "Укажите телефон: не меньше 10 цифр"),
+  email: (el) => (!el.value.trim() || el.checkValidity() ? "" : "Проверьте адрес почты: например, name@company.ru"),
+  consent: (el) => (el.checked ? "" : "Нужно согласие на обработку данных"),
+};
+document.querySelectorAll("[data-demo-form]").forEach((form) => {
+  const status = form.querySelector("[data-form-status]");
+  const check = (el) => {
+    const msg = formChecks[el.name]?.(el) ?? "";
+    const out = form.querySelector(`[data-error-for="${el.name}"]`);
+    if (out) out.textContent = msg;
+    if (msg) el.setAttribute("aria-invalid", "true");
+    else el.removeAttribute("aria-invalid");
+    return !msg;
+  };
+  form.addEventListener("input", (e) => e.target.getAttribute("aria-invalid") === "true" && check(e.target));
+  form.addEventListener("change", (e) => e.target.type === "checkbox" && e.target.getAttribute("aria-invalid") === "true" && check(e.target));
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const status = form.querySelector("[data-form-status]");
-    status.textContent = "Это концепт: заявка никуда не отправлена. Отправку на почту и в Telegram подключим после согласования адресов и серверной части.";
-  })
-);
+    if (form.noValidate) {
+      const fields = Object.keys(formChecks).map((n) => form.elements[n]).filter(Boolean);
+      const bad = fields.filter((el) => !check(el));
+      if (bad.length) {
+        status.textContent = "";
+        return bad[0].focus();
+      }
+    }
+    status.textContent = "Демо-режим: заявка не отправлена. Отправку подключим после согласования адресов и серверной части.";
+  });
+});
+
+/* Страница 3D-стенда: вращение модели, рендер и каркас, загрузка, ошибка и откат на рендер */
+const stand = document.querySelector("[data-stand]");
+if (stand) {
+  const model = stand.querySelector("[data-model]");
+  const still = stand.querySelector("[data-still]");
+  const status = stand.querySelector("[data-stand-status]");
+  const hint = stand.querySelector("[data-stand-hint]");
+  const auto = stand.querySelector("[data-autorotate]");
+  const bar = stand.querySelector(".stand-progress");
+  const base = model.getAttribute("poster").replace(/[^/]+$/, "");
+  const views = {
+    hero: { src: `${base}render_hero.webp`, alt: "Рендер демонстрационного стенда FRAMEX", hint: "Статичный рендер стенда." },
+    frame: { src: `${base}render_frame.webp`, alt: "Каркас демонстрационного стенда FRAMEX без обшивки, печати и мебели", hint: "Каркас того же стенда без обшивки и мебели." },
+  };
+  const hint3d = hint.textContent;
+  const buttons = stand.querySelectorAll("[data-mode]");
+  let failed = false;
+  const setMode = (mode) => {
+    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    const is3d = mode === "3d";
+    model.hidden = !is3d;
+    still.hidden = is3d;
+    auto.closest("label").hidden = !is3d;
+    if (!is3d) {
+      still.src = views[mode].src;
+      still.alt = views[mode].alt;
+    }
+    hint.textContent = is3d ? hint3d : views[mode].hint;
+  };
+  const fail = (text) => {
+    if (failed) return;
+    failed = true;
+    status.hidden = false;
+    status.textContent = text;
+    stand.querySelector('[data-mode="3d"]').disabled = true;
+    setMode("hero");
+  };
+  buttons.forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
+  auto.checked = false; // автовращение по умолчанию выключено
+  auto.addEventListener("change", () => model.toggleAttribute("auto-rotate", auto.checked));
+  model.addEventListener("progress", (e) => {
+    const p = e.detail?.totalProgress ?? 0;
+    bar?.style.setProperty("--progress", `${Math.round(p * 100)}%`);
+    if (p >= 1) bar?.classList.add("is-done");
+  });
+  model.addEventListener("load", () => {
+    status.hidden = true;
+    bar?.classList.add("is-done");
+  });
+  model.addEventListener("error", () => fail("3D-модель не загрузилась — показываем рендер."));
+  const gl = document.createElement("canvas");
+  if (!(gl.getContext("webgl2") || gl.getContext("webgl"))) fail("Браузер не поддерживает 3D — показываем рендер.");
+  // если библиотека просмотра не подключилась, через 10 с остаёмся на рендере
+  setTimeout(() => !customElements.get("model-viewer") && fail("3D-просмотр недоступен — показываем рендер."), 10000);
+}
 
 // Запуск в конце файла: к этому моменту все функции и списки элементов уже объявлены.
 if (intro && root.classList.contains("intro-on")) playIntro();

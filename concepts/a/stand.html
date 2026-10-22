@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ru" data-logo="sketch">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#ebe5da" />
+    <link rel="icon" href="data:," />
+    <title>FRAMEX · Демонстрационный стенд в 3D · Концепт A</title>
+    <script>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add("js");
+        try {
+          var params = new URLSearchParams(location.search);
+          if (params.get("bg") === "2") d.dataset.bg = "2"; // второй вариант фона первого экрана — сиреневый
+        } catch (e) {}
+        // Если скрипт страницы не загрузился, через 7 с показываем страницу без заставки и анимаций.
+        setTimeout(function () {
+          if (!d.classList.contains("page-ready")) d.classList.remove("intro-on", "js");
+        }, 7000);
+      })();
+    </script>
+    <link rel="preload" href="../../assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="../../assets/vendor/model-viewer-4.4.0/model-viewer.min.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">К содержанию</a>
+
+    <header class="header">
+      <a class="logo" href="index.html" aria-label="FRAMEX, на главную">
+        <span aria-hidden="true">FRAME</span><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="index.html#about">О нас</a>
+        <a href="index.html#works">Работы</a>
+        <a href="index.html#faq">Вопросы</a>
+        <a href="index.html#contacts">Контакты</a>
+      </nav>
+      <a class="btn btn--accent header-cta" href="index.html#contact"><span class="btn-label">Обсудить<span class="cta-long">&nbsp;проект</span></span><span class="btn-arrow" aria-hidden="true">→</span></a>
+      <button class="menu-button" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu" aria-label="Открыть меню">
+        <span aria-hidden="true"></span>
+      </button>
+      <div class="menu" id="menu" data-animated hidden>
+        <nav class="menu-nav" aria-label="Мобильная навигация">
+        <a style="--i: 0" href="index.html#about">О нас</a>
+        <a style="--i: 1" href="index.html#works">Работы</a>
+        <a style="--i: 2" href="index.html#faq">Вопросы</a>
+        <a style="--i: 3" href="index.html#contacts">Контакты</a>
+        </nav>
+        <div class="menu-foot" style="--i: 4">
+          <a class="btn btn--accent btn--large menu-cta" href="index.html#contact"><span class="btn-label">Обсудить проект</span><span class="btn-arrow" aria-hidden="true">→</span></a>
+          <a class="menu-phone" href="tel:+79117301033">+7&nbsp;911&nbsp;730-10-33</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="stand wrap" aria-labelledby="stand-title">
+        <div class="stand-head">
+          <p class="crumbs"><a href="works.html">Решения</a> <span aria-hidden="true">/</span> 3D</p>
+          <h1 id="stand-title" data-split>Демонстрационный стенд&nbsp;01</h1>
+          <p class="stand-lead" data-reveal>Угловой стенд на&nbsp;модульных рамах: стойка, экран и&nbsp;небольшая зона для общения. Покрутите модель, посмотрите рендер и&nbsp;каркас.</p>
+        </div>
+
+        <div class="stand-layout">
+          <div class="stand-stage" data-stand>
+            <div class="stand-tabs" role="group" aria-label="Вид стенда">
+              <button type="button" data-mode="3d" aria-pressed="true">3D</button>
+              <button type="button" data-mode="hero" aria-pressed="false">Рендер</button>
+              <button type="button" data-mode="frame" aria-pressed="false">Каркас</button>
+            </div>
+            <div class="stand-visual">
+              <model-viewer data-model
+                src="../../assets/stands/framex-stand-01/framex_stand_01.glb"
+                poster="../../assets/stands/framex-stand-01/render_hero.webp"
+                alt="Модульный угловой стенд FRAMEX с переговорной зоной и стойкой, 3D-модель"
+                camera-controls touch-action="pan-y" interaction-prompt="none" disable-pan
+                shadow-intensity="1" shadow-softness="0.8" environment-image="neutral" exposure="1.1"
+                camera-orbit="35deg 68deg 115%" min-camera-orbit="auto 20deg 65%" max-camera-orbit="auto 88deg 250%"
+                rotation-per-second="12deg">
+                <div class="stand-progress" slot="progress-bar" aria-hidden="true"><span></span></div>
+              </model-viewer>
+              <img class="stand-still" data-still src="../../assets/stands/framex-stand-01/render_hero.webp" width="1800" height="1500" alt="Рендер демонстрационного стенда FRAMEX" hidden />
+              <p class="stand-status" data-stand-status role="status">Загружаем 3D-модель…</p>
+              <noscript><img class="stand-still" src="../../assets/stands/framex-stand-01/render_hero.webp" width="1800" height="1500" alt="Рендер демонстрационного стенда FRAMEX" /></noscript>
+            </div>
+            <div class="stand-foot">
+              <span data-stand-hint>Потяните мышью или пальцем, чтобы осмотреть стенд. Колёсико или щипок&nbsp;— приближение.</span>
+              <label class="switch"><input type="checkbox" data-autorotate /><span>Автовращение</span></label>
+            </div>
+          </div>
+
+          <aside class="stand-aside" data-reveal>
+            <h2>Параметры</h2>
+            <dl class="spec">
+            <div><dt>Подиум</dt><dd>3&nbsp;×&nbsp;3&nbsp;м, высота 112&nbsp;мм</dd></div>
+            <div><dt>Модуль рамы</dt><dd>992&nbsp;×&nbsp;2480&nbsp;мм</dd></div>
+            <div><dt>Наружный профиль</dt><dd>62&nbsp;×&nbsp;55&nbsp;мм</dd></div>
+            <div><dt>Модули</dt><dd>3 задних и&nbsp;2 боковых</dd></div>
+            <div><dt>Высота стенда</dt><dd>2,59&nbsp;м</dd></div>
+          </dl>
+            <p class="showcase-note">Демонстрационная визуализация, не&nbsp;реализованный заказ. Цвета, мебель и&nbsp;арка предложены для оценки; пазы и&nbsp;крепления упрощены, конструкция не&nbsp;рассчитывалась.</p>
+            <a class="btn btn--accent btn--large stand-cta" href="index.html#contact"><span class="btn-label">Обсудить проект</span><span class="btn-arrow" aria-hidden="true">→</span></a>
+          </aside>
+        </div>
+
+        <div class="stand-extra">
+          <figure data-reveal="clip"><img src="../../assets/stands/framex-stand-01/render_front.webp" width="1800" height="1500" loading="lazy" decoding="async" alt="Тот же стенд, фронтальный ракурс" /></figure>
+          <figure data-reveal="clip"><img src="../../assets/stands/framex-stand-01/render_frame.webp" width="1800" height="1500" loading="lazy" decoding="async" alt="Каркас стенда без обшивки, печати и мебели" /></figure>
+        </div>
+        <p class="stand-captions"><span>Фронтальный ракурс</span><span>Каркас без обшивки и&nbsp;мебели</span></p>
+      </section>
+
+      <a class="cta-band" href="index.html#contact">
+        <span class="wrap cta-inner">
+          <span class="cta-note">Соберём стенд под&nbsp;вашу площадку и&nbsp;задачи бренда.</span>
+          <span class="cta-big"><span data-split>Обсудить проект</span><span class="cta-tile" aria-hidden="true"><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg></span></span>
+        </span>
+      </a>
+
+    </main>
+
+    <nav class="dock" aria-label="Мессенджеры">
+      <a class="dock-btn" href="https://t.me/+79117301033" target="_blank" rel="noopener"><svg class="logo-tg" viewBox="0 0 24 24" aria-hidden="true"><path fill="#26A5E4" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg><span class="dock-label">Telegram</span></a>
+      <a class="dock-btn dock-btn--soon" href="index.html#contacts"><svg class="logo-max" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="max-g-dock" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#3f6cff"/><stop offset=".55" stop-color="#7a45ff"/><stop offset="1" stop-color="#c03ff2"/></linearGradient></defs><rect width="24" height="24" rx="7" fill="url(#max-g-dock)"/><path d="M12 5.4a6.6 6.6 0 0 0-5.6 10.1l-.9 3.1 3.2-.8A6.6 6.6 0 1 0 12 5.4Z" fill="none" stroke="#fff" stroke-width="2.1" stroke-linejoin="round"/></svg><span class="dock-label">MAX: ссылка появится позже</span></a>
+    </nav>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <span class="logo logo--small" aria-hidden="true">FRAME<svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 50L8 8M50 50L92 8M50 50L92 92M50 50L8 92" /></svg></span>
+        <nav class="footer-nav" aria-label="Страницы">
+          <a href="index.html">Главная</a>
+          <a href="works.html">Решения</a>
+          <a href="stand.html">3D-стенд</a>
+        </nav>
+        <a class="footer-phone" href="tel:+79117301033">+7&nbsp;911&nbsp;730-10-33</a>
+        <p><a class="text-link" href="index.html">← На главную</a></p>
+      </div>
+    </footer>
+
+    <script src="../shared.js" defer></script>
+  </body>
+</html>
