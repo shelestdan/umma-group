@@ -758,11 +758,11 @@ if (stand) {
     status.hidden = true;
     bar?.classList.add("is-done");
   });
-  model.addEventListener("error", () => fail("3D-модель не загрузилась — показываем рендер."));
+  model.addEventListener("error", () => fail("3D-модель не загрузилась, показываем рендер."));
   const gl = document.createElement("canvas");
-  if (!(gl.getContext("webgl2") || gl.getContext("webgl"))) fail("Браузер не поддерживает 3D — показываем рендер.");
+  if (!(gl.getContext("webgl2") || gl.getContext("webgl"))) fail("Браузер не поддерживает 3D, показываем рендер.");
   // если библиотека просмотра не подключилась, через 10 с остаёмся на рендере
-  setTimeout(() => !customElements.get("model-viewer") && fail("3D-просмотр недоступен — показываем рендер."), 10000);
+  setTimeout(() => !customElements.get("model-viewer") && fail("3D-просмотр недоступен, показываем рендер."), 10000);
 }
 
 // Запуск в конце файла: к этому моменту все функции и списки элементов уже объявлены.
