@@ -1,0 +1,17 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "polish",
+  "scope": "site",
+  "prompt": "FRAMEX concept A: exhibition stand studio site, polish sweep",
+  "waived": [
+   "38iii"
+  ],
+  "pages": [
+   "concepts/a/index.html",
+   "concepts/a/works.html",
+   "concepts/a/stand.html"
+  ],
+  "date": "2026-11-08"
+ }
+]
