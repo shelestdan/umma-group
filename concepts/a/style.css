@@ -55,6 +55,9 @@
   --hero-paper: #e4dccd;
   --hero-lilac: #ebe4f8;
   --stage: #e6e3dc;
+  --ru-white: #fbfaf8;
+  --ru-blue: #0039a6;
+  --ru-red: #d52b1e;
   --font: "Onest", Helvetica, Arial, sans-serif;
 
   /* Единая типографическая шкала: Onest, четыре размера заголовков, один размер текста и подписей */
@@ -216,6 +219,9 @@ p { text-wrap: pretty; }
 }
 .about-lead { grid-area: lead; max-width: 28ch; font-size: var(--fs-lead); line-height: 1.2; font-weight: 600; letter-spacing: -0.025em; }
 .about-text { grid-area: text; display: grid; gap: 20px; align-content: end; justify-items: start; max-width: 44ch; font-size: clamp(17px, 1.35vw, 20px); color: var(--muted); }
+/* Рамы российского производства: флаг-плашка и строка крупнее основного текста */
+.about-origin { display: flex; align-items: flex-start; gap: 16px; font-size: var(--fs-h3); font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; color: var(--ink); }
+.flag { flex: none; width: 36px; height: 24px; margin-top: 0.08em; background: linear-gradient(var(--ru-white) 0 33.4%, var(--ru-blue) 0 66.7%, var(--ru-red) 0); box-shadow: inset 0 0 0 1px var(--line); }
 .about-photo { grid-area: photo; display: grid; gap: 12px; }
 .about-photo img { width: 100%; aspect-ratio: 6 / 5; object-fit: cover; background: var(--plate); }
 .about-photo figcaption, .showcase-note, .stand-captions { font-size: var(--fs-label); color: var(--muted); }
