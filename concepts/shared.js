@@ -234,7 +234,7 @@ function sketchController(svg) {
 }
 
 // Знаки, которые двигаются: заставка, первый экран, лента бренда, витрина на странице выбора
-document.querySelectorAll("[data-mark], [data-scroll-mark], [data-hero-mark], [data-mark-demo] svg").forEach((svg) => {
+document.querySelectorAll("[data-mark], [data-scroll-mark], [data-scrub-mark], [data-hero-mark], [data-mark-demo] svg").forEach((svg) => {
   const variant = svg.dataset.variant || pageLogo;
   svg.mark = variant === "sketch" ? sketchController(svg) : svgController(svg);
 });
@@ -399,6 +399,28 @@ const frameHero = document.querySelector("[data-frame-hero]");
 const expands = document.querySelectorAll("[data-expand]");
 const marquees = [...document.querySelectorAll("[data-marquee]")].map((el) => ({ el, mark: el.querySelector("[data-scroll-mark]") }));
 const heroMark = document.querySelector("[data-hero-mark]");
+// Сцена «О нас»: пока блок прокручивается, фраза проявляется слово за словом, а X собирается в раму
+const scrubs = [...document.querySelectorAll("[data-scrub]")].map((el) => ({ el, mark: el.querySelector("[data-scrub-mark]") }));
+document.querySelectorAll("[data-words]").forEach((el) => {
+  let i = 0;
+  const walk = (node) => [...node.childNodes].forEach((n) => {
+    if (n.nodeType !== 3) return walk(n);
+    const frag = document.createDocumentFragment();
+    n.textContent.split(/( +)/).forEach((t) => {
+      if (!t) return;
+      if (/^ +$/.test(t)) return frag.append(t);
+      const w = document.createElement("span");
+      w.className = "word";
+      w.style.setProperty("--i", i++);
+      w.textContent = t;
+      frag.append(w);
+    });
+    n.replaceWith(frag);
+  });
+  walk(el);
+  el.style.setProperty("--n", i);
+});
+if (reduceMotion) scrubs.forEach(({ mark }) => mark?.mark?.seek(mark.mark.frameAt));
 const depth = document.querySelectorAll("[data-speed]");
 const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
 
@@ -432,6 +454,13 @@ function onScroll() {
     const q = clamp01((vh - r.top) / (vh + r.height));
     el.style.setProperty("--q", q.toFixed(4));
     mark?.mark?.seek(q);
+  });
+  scrubs.forEach(({ el, mark }) => {
+    const r = el.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > vh) return;
+    const p = clamp01(-r.top / Math.max(r.height - vh, 1));
+    el.style.setProperty("--p", p.toFixed(4));
+    mark?.mark?.seek(clamp01(p / 0.8) * mark.mark.frameAt);
   });
   // Глубина: фото внутри рамок смещаются медленнее страницы
   depth.forEach((img) => {

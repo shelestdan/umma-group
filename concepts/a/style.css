@@ -1,6 +1,7 @@
 /* Hallmark · checked: 2026-11-08 · genre: editorial (inferred: studio site for exhibition stands)
  * floor: 0 FAIL · fixed: 48, 7a, 10a, 15, 6a, 34, 62, 63, 19, 67, 3, 11, F23, 24b · structural: printed (9, 58, 77)
  * built: the project · redesign: polish · v2.0.0 */
+/* Hallmark · dropped the about render and caption · the assembling 3D frame now carries the section, renders stay in Работы */
 /* Hallmark · waive 38iii · one slogan in the manifesto, coloured word and coral underline on «бренда» · the slogan has stayed on the live page through the client's reviews without objection */
 /* Hallmark · kept by client request: the 01 to 04 numerals over the service headings (gate 54) · she asked for them back in her review */
 /* Hallmark · dismissed 25 · the contact lede is two short sentences, which may sit from 28ch */
@@ -212,36 +213,35 @@ p { text-wrap: pretty; }
 [data-bg="2"] .hero-mark::after { background: var(--accent); }
 
 /* ---------- О нас ---------- */
-/* О нас: тёмная панель в языке «Что берём на себя»; слева заголовок, фраза и три пункта
-   с одинаковыми маркерами (профиль с отверстиями, у российских рам — флаг), справа каркас стенда */
-.about { padding-block: clamp(16px, 2vw, 32px) var(--section); }
-.about-inner { display: grid; gap: clamp(48px, 6vw, 96px); }
-.about-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: var(--graphite); color: var(--snow); }
-.about-panel :focus-visible { outline-color: var(--snow); }
-.about-body { display: grid; align-content: start; justify-items: start; gap: clamp(24px, 2.6vw, 40px); padding: clamp(24px, 4.4vw, 72px); }
-.about-body .section-title { overflow-wrap: break-word; min-width: 0; }
-.about-lead { max-width: 24ch; font-size: var(--fs-lead); line-height: 1.16; font-weight: 600; letter-spacing: -0.03em; }
-.about-facts { list-style: none; margin: 0; padding: 0; justify-self: stretch; border-top: 1px solid color-mix(in srgb, var(--snow) 16%, transparent); }
-.about-facts li {
-  display: flex; align-items: flex-start; gap: 20px; padding-block: 20px;
-  border-bottom: 1px solid color-mix(in srgb, var(--snow) 16%, transparent);
-  font-size: var(--fs-h3); font-weight: 600; line-height: 1.2; letter-spacing: -0.02em;
+/* О нас: тёмная сцена. Пока блок прокручивается, сцена стоит на месте, фраза проявляется
+   слово за словом, «российского производства» подчёркивается триколором, X справа собирается в раму.
+   Без скрипта и при «уменьшении движения» фраза видна целиком, рама собрана. */
+.about { background: var(--graphite); color: var(--snow); padding-top: var(--section); }
+.about :focus-visible { outline-color: var(--snow); }
+.about .section-title { overflow-wrap: break-word; min-width: 0; }
+.about-scrub { --p: 1; height: 240svh; }
+.js .about-scrub { --p: 0; }
+.about-stage {
+  position: sticky; top: 0; height: 100svh; padding-top: var(--header); padding-bottom: clamp(24px, 4vw, 64px);
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: center; gap: clamp(32px, 5vw, 96px);
 }
-/* Маркер: рама, в которую собирается X из логотипа; у российских рам рама в цветах триколора */
-.about-mark {
-  flex: none; width: 28px; height: 28px; margin-top: calc((1.2em - 28px) / 2); box-sizing: border-box; padding: 8px;
-  background: var(--accent);
-  -webkit-mask: linear-gradient(var(--ink) 0 0) content-box, linear-gradient(var(--ink) 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(var(--ink) 0 0) content-box exclude, linear-gradient(var(--ink) 0 0);
+.about-mark { order: 2; justify-self: center; width: min(100%, 520px); height: auto; aspect-ratio: 1; color: var(--accent); --hole: var(--graphite); --mark-shade: var(--accent-shade); }
+.about-copy { display: grid; justify-items: start; gap: clamp(28px, 3vw, 48px); }
+.about-statement { font-size: clamp(30px, 4vw, 64px); line-height: 1.1; font-weight: 700; letter-spacing: -0.035em; overflow-wrap: break-word; min-width: 0; }
+.js .about-statement .word { opacity: clamp(0.16, calc(var(--p) * 1.4 * var(--n) - var(--i)), 1); }
+.about-ru {
+  --u: clamp(0%, calc((var(--p) - 0.2) * 400%), 100%);
+  padding-bottom: 0.12em;
+  background:
+    linear-gradient(var(--ru-white), var(--ru-white)) 0 calc(100% - 0.1em) / var(--u) 0.045em no-repeat,
+    linear-gradient(var(--ru-blue-light), var(--ru-blue-light)) 0 calc(100% - 0.055em) / var(--u) 0.045em no-repeat,
+    linear-gradient(var(--ru-red), var(--ru-red)) 0 calc(100% - 0.01em) / var(--u) 0.045em no-repeat;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
-.about-panel .more-link { color: var(--pop); }
-.about-photo { position: relative; display: grid; overflow: hidden; background: var(--plate); }
-.about-photo img { width: 100%; height: 100%; min-height: 100%; object-fit: cover; }
-.about-photo figcaption {
-  position: absolute; left: 16px; bottom: 16px; padding: 4px 12px;
-  background: color-mix(in srgb, var(--snow) 92%, transparent); color: var(--ink); font-size: var(--fs-label);
-}
+.about .more-link { color: var(--pop); }
+.js .about-copy .more-link { opacity: clamp(0, calc((var(--p) - 0.72) * 6), 1); }
+.js .about-copy .more-link:focus-visible { opacity: 1; }
+.manifesto-block { padding-block: var(--section); }
 .showcase-note, .stand-captions { font-size: var(--fs-label); color: var(--muted); }
 .manifesto { font-size: clamp(40px, 7vw, 112px); line-height: 1; font-weight: 700; letter-spacing: -0.05em; }
 
@@ -280,15 +280,6 @@ p { text-wrap: pretty; }
 }
 .bb-text::before { content: ""; flex: none; width: 0.55em; height: 0.55em; background: var(--pop); }
 .brandband .mark { --hole: var(--graphite); }
-/* Лента «О нас»: светлая, едет в обратную сторону; рама графитовая, три отверстия на рёбрах в цветах триколора */
-.brandband--about { padding-block: clamp(24px, 4vw, 64px) clamp(40px, 5vw, 80px); }
-.brandband--about .brandband-track { transform: translate3d(calc((var(--q) - 1) * 38%), 0, 0); }
-.brandband--about .bb-logo { color: var(--ink); }
-.brandband--about .bb-text { color: var(--ink); }
-.brandband--about .mark {
-  flex: none; font-size: clamp(88px, 17vw, 280px); color: var(--ink);
-  --mark-shade: var(--ink-deep); --hole: var(--paper); --hole-1: var(--ru-white); --hole-2: var(--ru-blue-light); --hole-3: var(--ru-red);
-}
 
 /* Переход «рамой»: тёмные блоки раскрываются из узкой панели на всю ширину */
 [data-expand] { --e: 1; }
@@ -599,6 +590,8 @@ a.msg:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 2px var(--acc
 .stand-captions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(12px, 1.4vw, 20px); margin-top: calc(clamp(28px, 3.4vw, 48px) * -1 + 12px); }
 
 @media (prefers-reduced-motion: reduce) {
+  .about-scrub { --p: 1 !important; height: auto !important; }
+  .about-stage { position: static; height: auto; padding-block: clamp(32px, 4vw, 64px) var(--section); }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; transition-delay: 0s !important; animation-duration: 0.01ms !important; }
 }
@@ -661,8 +654,10 @@ a.msg:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 2px var(--acc
   .menu-cta { width: 100%; }
   .menu-open .header { transform: none; }
 
-  .about-panel { grid-template-columns: minmax(0, 1fr); }
-  .about-photo { aspect-ratio: 6 / 5; }
+  .about-scrub { height: 200svh; }
+  .about-stage { grid-template-columns: minmax(0, 1fr); align-content: center; gap: 24px; }
+  .about-mark { order: 0; justify-self: start; width: clamp(140px, 42vw, 240px); }
+  .about-statement { font-size: clamp(24px, 6.6vw, 40px); }
   .faq, .contact-inner, .hero-grid, .page-hero-inner { grid-template-columns: minmax(0, 1fr); }
   .hero { min-height: 0; }
   .hero-mark { width: min(100%, 520px); aspect-ratio: 5 / 4; }
