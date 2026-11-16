@@ -134,11 +134,15 @@ function sketchController(svg) {
   const parts = PROFILES.map((p) => {
     const g = document.createElementNS(SVG_NS, "g");
     const faces = Array.from({ length: 6 }, () => g.appendChild(document.createElementNS(SVG_NS, "path")));
-    const holePath = g.appendChild(document.createElementNS(SVG_NS, "path"));
-    holePath.setAttribute("style", "fill:var(--hole, #fff);stroke:none");
+    // три отверстия — отдельные контуры: по умолчанию все цвета --hole, но каждое можно перекрасить (--hole-1…3)
+    const holePaths = [1, 2, 3].map((k) => {
+      const el = g.appendChild(document.createElementNS(SVG_NS, "path"));
+      el.setAttribute("style", `fill:var(--hole-${k}, var(--hole, #fff));stroke:none`);
+      return el;
+    });
     svg.append(g);
     const xs = p.quad.map((v) => v[0]);
-    return { ...p, g, faces, holePath, cx: (Math.min(...xs) + Math.max(...xs)) / 2, holes: holes(p) };
+    return { ...p, g, faces, holePaths, cx: (Math.min(...xs) + Math.max(...xs)) / 2, holes: holes(p) };
   });
   const H = PR.d / 2;
 
@@ -182,16 +186,16 @@ function sketchController(svg) {
         const nl = Math.hypot(...n) || 1;
         n = n.map((k) => k / nl);
         if (n[0] * (fc[0] - centre[0]) + n[1] * (fc[1] - centre[1]) + n[2] * (fc[2] - centre[2]) < 0) n = n.map((k) => -k);
-        if (f === 2) p.holePath.setAttribute("d", "");
+        if (f === 2) p.holePaths.forEach((el) => el.setAttribute("d", ""));
         if (n[2] < 0.02) return el.setAttribute("d", "");
         const d = `M${poly.map((v) => `${v[0].toFixed(2)} ${v[1].toFixed(2)}`).join("L")}Z`;
         if (f === 2) {
           // наружное ребро: отверстия цветом фона (--hole) поверх грани; сквозь сплошной профиль ничего не видно
-          p.holePath.setAttribute("d", p.holes.map(({ c: [hx, hy], u }) => `M${Array.from({ length: 20 }, (_, k) => {
+          p.holes.forEach(({ c: [hx, hy], u }, h) => p.holePaths[h].setAttribute("d", `M${Array.from({ length: 20 }, (_, k) => {
             const t = (k / 20) * 2 * Math.PI, r = PR.d * 0.27;
             const v = P([hx + r * Math.cos(t) * u[0], hy + r * Math.cos(t) * u[1], r * Math.sin(t)]);
             return `${v[0].toFixed(2)} ${v[1].toFixed(2)}`;
-          }).join("L")}Z`).join(""));
+          }).join("L")}Z`));
         }
         // светотень: свет спереди-слева-сверху. Грань к зрителю — чистый цвет знака, рёбра справа и снизу темнее.
         // Тень смешивается с --mark-shade (тон фона), а не с чёрным: белый знак не даёт серых полос.

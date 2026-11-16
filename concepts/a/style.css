@@ -56,7 +56,7 @@
   --hero-lilac: #ebe4f8;
   --stage: #e6e3dc;
   --ru-white: #fbfaf8;
-  --ru-blue: #0039a6;
+  --ru-blue-light: #2a63e0;
   --ru-red: #d52b1e;
   --font: "Onest", Helvetica, Arial, sans-serif;
 
@@ -214,7 +214,8 @@ p { text-wrap: pretty; }
 /* ---------- О нас ---------- */
 /* О нас: тёмная панель в языке «Что берём на себя»; слева заголовок, фраза и три пункта
    с одинаковыми маркерами (профиль с отверстиями, у российских рам — флаг), справа каркас стенда */
-.about { padding-block: var(--section); display: grid; gap: clamp(48px, 6vw, 96px); }
+.about { padding-block: clamp(16px, 2vw, 32px) var(--section); }
+.about-inner { display: grid; gap: clamp(48px, 6vw, 96px); }
 .about-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: var(--graphite); color: var(--snow); }
 .about-panel :focus-visible { outline-color: var(--snow); }
 .about-body { display: grid; align-content: start; justify-items: start; gap: clamp(24px, 2.6vw, 40px); padding: clamp(24px, 4.4vw, 72px); }
@@ -234,7 +235,6 @@ p { text-wrap: pretty; }
   -webkit-mask-composite: xor;
   mask: linear-gradient(var(--ink) 0 0) content-box exclude, linear-gradient(var(--ink) 0 0);
 }
-.about-mark--ru { background: linear-gradient(var(--ru-white) 0 33.4%, var(--ru-blue) 0 66.7%, var(--ru-red) 0); }
 .about-panel .more-link { color: var(--pop); }
 .about-photo { position: relative; display: grid; overflow: hidden; background: var(--plate); }
 .about-photo img { width: 100%; height: 100%; min-height: 100%; object-fit: cover; }
@@ -280,6 +280,15 @@ p { text-wrap: pretty; }
 }
 .bb-text::before { content: ""; flex: none; width: 0.55em; height: 0.55em; background: var(--pop); }
 .brandband .mark { --hole: var(--graphite); }
+/* Лента «О нас»: светлая, едет в обратную сторону; рама графитовая, три отверстия на рёбрах в цветах триколора */
+.brandband--about { padding-block: clamp(24px, 4vw, 64px) clamp(40px, 5vw, 80px); }
+.brandband--about .brandband-track { transform: translate3d(calc((var(--q) - 1) * 38%), 0, 0); }
+.brandband--about .bb-logo { color: var(--ink); }
+.brandband--about .bb-text { color: var(--ink); }
+.brandband--about .mark {
+  flex: none; font-size: clamp(88px, 17vw, 280px); color: var(--ink);
+  --mark-shade: var(--ink-deep); --hole: var(--paper); --hole-1: var(--ru-white); --hole-2: var(--ru-blue-light); --hole-3: var(--ru-red);
+}
 
 /* Переход «рамой»: тёмные блоки раскрываются из узкой панели на всю ширину */
 [data-expand] { --e: 1; }
