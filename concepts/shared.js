@@ -400,7 +400,8 @@ const expands = document.querySelectorAll("[data-expand]");
 const marquees = [...document.querySelectorAll("[data-marquee]")].map((el) => ({ el, mark: el.querySelector("[data-scroll-mark]") }));
 const heroMark = document.querySelector("[data-hero-mark]");
 // Сцена «О нас»: пока блок прокручивается, фраза проявляется слово за словом, а X собирается в раму
-const scrubs = [...document.querySelectorAll("[data-scrub]")].map((el) => ({ el, mark: el.querySelector("[data-scrub-mark]") }));
+const scrubs = [...document.querySelectorAll("[data-scrub]")].map((el) => ({ el, mark: el.querySelector("[data-scrub-mark]"), lines: [...el.querySelectorAll(".about-lines path")] }));
+const wordScrubs = document.querySelectorAll("[data-wordscrub]");
 document.querySelectorAll("[data-words]").forEach((el) => {
   let i = 0;
   const walk = (node) => [...node.childNodes].forEach((n) => {
@@ -455,12 +456,20 @@ function onScroll() {
     el.style.setProperty("--q", q.toFixed(4));
     mark?.mark?.seek(q);
   });
-  scrubs.forEach(({ el, mark }) => {
+  scrubs.forEach(({ el, mark, lines }) => {
     const r = el.getBoundingClientRect();
     if (r.bottom < 0 || r.top > vh) return;
     const p = clamp01(-r.top / Math.max(r.height - vh, 1));
     el.style.setProperty("--p", p.toFixed(4));
     mark?.mark?.seek(clamp01(p / 0.8) * mark.mark.frameAt);
+    // контуры стенда прорисовываются по очереди (Safari не считает calc в stroke-dashoffset, поэтому из скрипта)
+    lines.forEach((path, k) => (path.style.strokeDashoffset = (1 - clamp01((p / 0.48 - (k / lines.length) * 0.7) / 0.3)).toFixed(4)));
+  });
+  // Фраза под сценой проявляется, пока блок поднимается от низа экрана к верхней трети
+  wordScrubs.forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > vh) return;
+    el.style.setProperty("--p", clamp01((vh * 0.92 - r.top) / (vh * 0.6)).toFixed(4));
   });
   // Глубина: фото внутри рамок смещаются медленнее страницы
   depth.forEach((img) => {
